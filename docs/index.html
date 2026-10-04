@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ATMlib Track Editor v0.0.1</title>
+<title>ATMlib Track Editor v0.0.2</title>
 <link href="https://fonts.googleapis.com/css?family=Cookie&display=swap" rel="stylesheet" />
 <style>
   :root {
@@ -174,7 +174,7 @@
   <a class="site-logo" href="https://t-arg.github.io/" title="TEAM a.r.g." target="_blank" rel="noopener noreferrer">
     <img src="data:image/gif;base64,R0lGODlheQAuAMIFAEc8Okg8OUY9Nk5BPv7+/P///////////yH+EUNyZWF0ZWQgd2l0aCBHSU1QACH5BAEKAAcALAAAAAB5AC4AAAP+eHrRHivKSau9OOudA/kf4HBkaZ5PCnEe6DrDKc/z0LpfEG83DqrAxo5GNNk+tkduiOklB74oTheswipJq5CSvSqOBHDux7T0WjCptKeO6iTJ9uu9EJMP4Dz0XKacpw8DXYFyhXR4bIUEh4lLLWINi1N9En9hUIBrSFoqmItfTlaeizF5aZJhjR6Cd2Yve6o4rDqoiks5iCBxakJkjze0m7qeHr24ri9twTlopLY/uDd2ysGRtbdiT2OLwILeOw5Tco2oy4q0VMLPzrqJ6T/h13MPCsU4AIMpAFL428/Fj/b5+KYJWhSBLkQY9BGpGKJp8v75wyGgokUBY6w16jL+ioy6dRPn2LDBgBtDkAbNwUshyF6qgSpcsCoHciY5ew0Y7Hp1aV01W+EAMgQyZwzEcc3cjMzZ0I1JnyF5WXspa+rNeCifDpUEQchUeMy+AopHzg0adw3fwTxqi61XkgA7ivjmDaEsb2jsUvu4UslBrFnL4uyapSqQjn3RIA7rV2HWTWJBkptLZQFAYFrWYL3KUi1Kv48jQua2AJ+xVEDm8tv8zLRZ0DAD6I3KSzOVFfVEnA3CjTNYoJFjvlZV9qRZESIipOhNFHDR38DHwp5H3J3T4TmVB+XNbHYOux4AeL+eODIB3Y3Q34uFfYKSKiuZPTe6mLkD9ETlM8YeP1P+e/foISebPOHMtBBXux2Wj3A92cfJfvKZx41ufsDHxnYQMsbJdvnpt6EVw4imYQWylShgdeLFlOCDCN6X4gMvarHPgwMKJiCJ8A1loYYf2lfeh5dlJqJ9OHKnY3M8inLEckkK1xyQto1QSYp03YddGsg5qANdg1xioJaBrJiWV1S0NF1f7kUyI2bBWRgJlwseKROceM35zSp7tMSNmebRU0lYjOkpHSFbFhfaY+OBIB6fR1ZSTGG3pTgojIvECOSlmLJ4Hj47LUGSZUFyqF+TsPAYJTVnUscgczsJYYef9Ty1HIMs1XlbGUFol6ujuxaJGwOmYQaJH6TAkA6DVQbN1YWuQIBaBbPNkvjErwzcBl1X9JiyCjN4GXpMmlbUE8ggzm65LIkvVBAsQ8Cet4K2jkDXxqe8unpuCqBIGUgd3iDzLQUC5BMDTnUIhAk+JT1aBXgVSlltdviKSwesGwwgEMIo/BABJOBo7O8n4Gb38AoRVzsErCpY8EQNXtTRchaUuLxEw0Hs0G3JeJgp8ZZF9HzCyjRHqx259VLs89E915rFyNUiMgI9uRqN9NQsoMxUNO8+jXXKaFDtNQl08VvKFoKI7XQpcJ79tQQJAAA7" alt="TEAM a.r.g.">
   </a>
-  <h1>ATMlib Track Editor <span style="color:#6b5f5e;font-weight:500">v0.0.1</span></h1>
+  <h1>ATMlib Track Editor <span style="color:#6b5f5e;font-weight:500">v0.0.2</span></h1>
   <button id="btnNewSong" type="button">New ATM song</button>
   <button id="btnNewSfx" type="button">New ATM sound effect</button>
   <button id="btnImport" type="button">Import songs.h</button>
@@ -484,15 +484,9 @@ function buildRow(kind, line, idx) {
       const edge = document.createElement("div");
       edge.className = "edge";
       note.appendChild(edge);
-      note.draggable = true;
-      note.ondragstart = ev => {
-        if (ev.target === edge) { ev.preventDefault(); return; }
-        ev.dataTransfer.setData("text/plain", JSON.stringify({ from: "note", tick: i, dur: st.hold, atm: st.note }));
-        ev.dataTransfer.effectAllowed = "move";
-      };
+      bindNoteDrag(note, edge, i, lane);
       lane.appendChild(note);
     }
-    enableScoreDrop(lane);
   } else {
     enableFxDrop(lane, idx);
     line.cells.forEach((c, i) => {
@@ -566,31 +560,43 @@ function enableFxDrop(lane, idx) {
     renderScore();
   };
 }
-function enableScoreDrop(lane) {
-  lane.ondragover = e => {
-    const types = e.dataTransfer.types || [];
-    if (!types.includes("text/plain") && !e.dataTransfer.getData) return;
+function bindNoteDrag(note, edge, head, lane) {
+  note.onmousedown = e => {
+    if (e.target === edge) return;
     e.preventDefault();
-    lane.classList.add("drop");
-    e.dataTransfer.dropEffect = "move";
-    const tick = tickFromEvent(lane, e);
-    lane.querySelectorAll(".cell").forEach(c => c.classList.toggle("sel", +c.dataset.i === tick));
+    const dur = state.steps[head].hold;
+    const atm = state.steps[head].note;
+    note.style.visibility = "hidden";
+    const ghost = note.cloneNode(true);
+    ghost.style.position = "fixed";
+    ghost.style.visibility = "visible";
+    ghost.style.left = (e.clientX - 16) + "px";
+    ghost.style.top = (e.clientY - 12) + "px";
+    ghost.style.width = Math.max(24, dur * 28 - 4) + "px";
+    ghost.style.zIndex = "80";
+    ghost.style.pointerEvents = "none";
+    ghost.style.margin = "0";
+    document.body.appendChild(ghost);
+    function move(ev) {
+      ghost.style.left = (ev.clientX - 16) + "px";
+      ghost.style.top = (ev.clientY - 12) + "px";
+      const tick = tickFromEvent(lane, ev);
+      const dest = Math.max(0, Math.min(state.len - dur, tick));
+      lane.querySelectorAll(".cell").forEach(c => c.classList.toggle("sel", +c.dataset.i === dest));
+    }
+    function up(ev) {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+      ghost.remove();
+      const tick = tickFromEvent(lane, ev);
+      const dest = Math.max(0, Math.min(state.len - dur, tick));
+      if (dest !== head) paintMove(head, dest, dur, atm);
+      state.sel = dest;
+      renderScore();
+    }
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
   };
-  lane.ondragleave = () => lane.classList.remove("drop");
-  lane.ondrop = e => {
-    e.preventDefault();
-    lane.classList.remove("drop");
-    let data = {};
-    try { data = JSON.parse(e.dataTransfer.getData("text/plain") || "{}"); } catch (err) {}
-    if (data.from !== "note") return;
-    const tick = tickFromEvent(lane, e);
-    const dest = Math.max(0, Math.min(state.len - data.dur, tick));
-    if (dest !== data.tick) paintMove(data.tick, dest, data.dur, data.atm);
-    state.sel = dest;
-    renderScore();
-  };
-}
-function bindNoteDrag(note, edge, head) {
   edge.onmousedown = e => {
     e.preventDefault();
     e.stopPropagation();
@@ -598,12 +604,15 @@ function bindNoteDrag(note, edge, head) {
     const startDur = state.steps[head].hold;
     function move(ev) {
       const dx = Math.round((ev.clientX - origin) / 28);
-      applyHold(head, startDur + dx);
-      renderScore();
+      const dur = Math.max(1, Math.min(state.len - head, startDur + dx));
+      note.style.width = (dur * 28 - 4) + "px";
+      note.dataset.dur = String(dur);
     }
     function up() {
       window.removeEventListener("mousemove", move);
       window.removeEventListener("mouseup", up);
+      applyHold(head, +(note.dataset.dur || startDur));
+      renderScore();
     }
     window.addEventListener("mousemove", move);
     window.addEventListener("mouseup", up);
