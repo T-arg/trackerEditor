@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ATMlib Track Editor v0.0.2</title>
+<title>ATMlib Track Editor v0.0.3</title>
 <link href="https://fonts.googleapis.com/css?family=Cookie&display=swap" rel="stylesheet" />
 <style>
   :root {
@@ -174,7 +174,7 @@
   <a class="site-logo" href="https://t-arg.github.io/" title="TEAM a.r.g." target="_blank" rel="noopener noreferrer">
     <img src="data:image/gif;base64,R0lGODlheQAuAMIFAEc8Okg8OUY9Nk5BPv7+/P///////////yH+EUNyZWF0ZWQgd2l0aCBHSU1QACH5BAEKAAcALAAAAAB5AC4AAAP+eHrRHivKSau9OOudA/kf4HBkaZ5PCnEe6DrDKc/z0LpfEG83DqrAxo5GNNk+tkduiOklB74oTheswipJq5CSvSqOBHDux7T0WjCptKeO6iTJ9uu9EJMP4Dz0XKacpw8DXYFyhXR4bIUEh4lLLWINi1N9En9hUIBrSFoqmItfTlaeizF5aZJhjR6Cd2Yve6o4rDqoiks5iCBxakJkjze0m7qeHr24ri9twTlopLY/uDd2ysGRtbdiT2OLwILeOw5Tco2oy4q0VMLPzrqJ6T/h13MPCsU4AIMpAFL428/Fj/b5+KYJWhSBLkQY9BGpGKJp8v75wyGgokUBY6w16jL+ioy6dRPn2LDBgBtDkAbNwUshyF6qgSpcsCoHciY5ew0Y7Hp1aV01W+EAMgQyZwzEcc3cjMzZ0I1JnyF5WXspa+rNeCifDpUEQchUeMy+AopHzg0adw3fwTxqi61XkgA7ivjmDaEsb2jsUvu4UslBrFnL4uyapSqQjn3RIA7rV2HWTWJBkptLZQFAYFrWYL3KUi1Kv48jQua2AJ+xVEDm8tv8zLRZ0DAD6I3KSzOVFfVEnA3CjTNYoJFjvlZV9qRZESIipOhNFHDR38DHwp5H3J3T4TmVB+XNbHYOux4AeL+eODIB3Y3Q34uFfYKSKiuZPTe6mLkD9ETlM8YeP1P+e/foISebPOHMtBBXux2Wj3A92cfJfvKZx41ufsDHxnYQMsbJdvnpt6EVw4imYQWylShgdeLFlOCDCN6X4gMvarHPgwMKJiCJ8A1loYYf2lfeh5dlJqJ9OHKnY3M8inLEckkK1xyQto1QSYp03YddGsg5qANdg1xioJaBrJiWV1S0NF1f7kUyI2bBWRgJlwseKROceM35zSp7tMSNmebRU0lYjOkpHSFbFhfaY+OBIB6fR1ZSTGG3pTgojIvECOSlmLJ4Hj47LUGSZUFyqF+TsPAYJTVnUscgczsJYYef9Ty1HIMs1XlbGUFol6ujuxaJGwOmYQaJH6TAkA6DVQbN1YWuQIBaBbPNkvjErwzcBl1X9JiyCjN4GXpMmlbUE8ggzm65LIkvVBAsQ8Cet4K2jkDXxqe8unpuCqBIGUgd3iDzLQUC5BMDTnUIhAk+JT1aBXgVSlltdviKSwesGwwgEMIo/BABJOBo7O8n4Gb38AoRVzsErCpY8EQNXtTRchaUuLxEw0Hs0G3JeJgp8ZZF9HzCyjRHqx259VLs89E915rFyNUiMgI9uRqN9NQsoMxUNO8+jXXKaFDtNQl08VvKFoKI7XQpcJ79tQQJAAA7" alt="TEAM a.r.g.">
   </a>
-  <h1>ATMlib Track Editor <span style="color:#6b5f5e;font-weight:500">v0.0.2</span></h1>
+  <h1>ATMlib Track Editor <span style="color:#6b5f5e;font-weight:500">v0.0.3</span></h1>
   <button id="btnNewSong" type="button">New ATM song</button>
   <button id="btnNewSfx" type="button">New ATM sound effect</button>
   <button id="btnImport" type="button">Import songs.h</button>
@@ -222,7 +222,7 @@
   <aside class="panel right" id="right">
     <div class="work-only" id="rightBody">
     <h2>Sound effect</h2>
-    <p class="hint">One voice, one horizontal score. Notes are ATMlib note numbers (C2 = 1), same mapping as the v0.1.7 tracker.</p>
+    <p class="hint">Playback runs the ATMlib playroutine compiled to WebAssembly. The speaker pin is a 31250 Hz mixer matching the library waveforms: pulse, square, saw, noise.</p>
     <p class="hint"><kbd>Space</kbd> play / stop · <kbd>A</kbd><kbd>W</kbd><kbd>S</kbd><kbd>E</kbd><kbd>D</kbd>… piano · drag a note to move it · drag the yellow edge to change length.</p>
     <h2>Selected step</h2>
     <p id="stepInfo" class="hint">No sound effect yet.</p>
@@ -232,6 +232,11 @@
     </div>
   </aside>
 </div>
+<script>
+var AtmLib=(()=>{var _scriptName=globalThis.document?.currentScript?.src;return async function(moduleArg={}){var Module=moduleArg;var ENVIRONMENT_IS_WEB=!!globalThis.window;var ENVIRONMENT_IS_WORKER=!!globalThis.WorkerGlobalScope;var ENVIRONMENT_IS_NODE=globalThis.process?.versions?.node&&globalThis.process?.type!="renderer";var programArgs=[];var thisProgram="./this.program";var quit_=(status,toThrow)=>{throw toThrow};if(typeof __filename!="undefined"){_scriptName=__filename}else if(ENVIRONMENT_IS_WORKER){_scriptName=self.location.href}var scriptDirectory="";var readAsync,readBinary;if(ENVIRONMENT_IS_NODE){var fs=require("node:fs");scriptDirectory=__dirname+"/";readBinary=filename=>{filename=isFileURI(filename)?new URL(filename):filename;var ret=fs.readFileSync(filename);return ret};readAsync=async(filename,binary=true)=>{filename=isFileURI(filename)?new URL(filename):filename;var ret=fs.readFileSync(filename,binary?undefined:"utf8");return ret};if(process.argv.length>1){thisProgram=process.argv[1].replace(/\\/g,"/")}programArgs=process.argv.slice(2);quit_=(status,toThrow)=>{process.exitCode=status;throw toThrow}}else if(ENVIRONMENT_IS_WEB||ENVIRONMENT_IS_WORKER){try{scriptDirectory=new URL(".",_scriptName).href}catch{}{if(ENVIRONMENT_IS_WORKER){readBinary=url=>{var xhr=new XMLHttpRequest;xhr.open("GET",url,false);xhr.responseType="arraybuffer";xhr.send(null);return new Uint8Array(xhr.response)}}readAsync=async url=>{if(isFileURI(url)){return new Promise((resolve,reject)=>{var xhr=new XMLHttpRequest;xhr.open("GET",url,true);xhr.responseType="arraybuffer";xhr.onload=()=>{if(xhr.status==200||xhr.status==0&&xhr.response){resolve(xhr.response);return}reject(xhr.status)};xhr.onerror=reject;xhr.send(null)})}var response=await fetch(url,{credentials:"same-origin"});if(response.ok){return response.arrayBuffer()}throw new Error(response.status+" : "+response.url)}}}else{}var out=console.log.bind(console);var err=console.error.bind(console);var wasmBinary;var ABORT=false;var isFileURI=filename=>filename.startsWith("file://");class EmscriptenEH{}class EmscriptenSjLj extends EmscriptenEH{}function binaryDecode(bin){for(var i=0,l=bin.length,o=new Uint8Array(l),c;i<l;++i){c=bin.charCodeAt(i);o[i]=~c>>8&c}return o}var runtimeInitialized=false;function updateMemoryViews(){var b=wasmMemory.buffer;HEAP8=new Int8Array(b);HEAP16=new Int16Array(b);Module["HEAPU8"]=HEAPU8=new Uint8Array(b);HEAP32=new Int32Array(b);HEAPU32=new Uint32Array(b);Module["HEAPF32"]=HEAPF32=new Float32Array(b);HEAPF64=new Float64Array(b);HEAP64=new BigInt64Array(b)}function preRun(){var preRun=Module["preRun"];if(preRun){if(typeof preRun=="function")preRun=[preRun];onPreRuns.push(...preRun)}callRuntimeCallbacks(onPreRuns)}function initRuntime(){runtimeInitialized=true;wasmExports["__wasm_call_ctors"]()}function postRun(){var postRun=Module["postRun"];if(postRun){if(typeof postRun=="function")postRun=[postRun];onPostRuns.push(...postRun)}callRuntimeCallbacks(onPostRuns)}function abort(what){Module["onAbort"]?.(what);what=`Aborted(${what})`;err(what);ABORT=true;what+=". Build with -sASSERTIONS for more info.";var e=new WebAssembly.RuntimeError(what);throw e}var wasmBinaryFile;function findWasmBinary(){return binaryDecode(' asm   "``  ` ` ` `` envemscripten_resize_heap  \r   p&A A	 A	 A°	 A	 A 	memory __wasm_call_ctors 	cia_countciaoscATM_playroutine atm_sfx atm_stop \natm_active \natm_render pcmhalf__indirect_function_table malloc free setThrew \r_emscripten_stack_restore _emscripten_stack_alloc emscripten_stack_get_current 	\nÎP\r ¦A	-  !A	-  !	AÊ	-  !\nA	-  !A!@A ! ! @@@@@ "\r@AÉ	-  @ \nAÿq vAq\r AlA : °	 \nAÿq vAq! A<lAÐ	j   G\rA !AÀ" - 1"@    - 2" AqO@AÄ	 AvAþ q/; A  Aj: 2  , 7"@    - 8" Aÿ qO@A!    -  AuArj": @ Aÿq"@A?! AÀ I\r   :  !   AÿqAt/;(A  Aj: 8  - +"@  - ,!@  - -"\r  AÀ q"@  /(  - * ÀjÁ!  ÀA H\r A  A H\r  AµÉ   AµÉ O AÿqAÀ I! @   ;(   : *   AjA   A?qI: -@  - ."E\r   - "E\r   - /"Aq  - 0"AqK@   Aj: 0@@ Aàq"@@ A G\r  AÿF\r  AÀ qE\r  A : 0  A : 0 AÿF@A !  Avj!  AÀ : 0 Aq Avj j!   AÿqAt  , 3AtjAj/ ;(  - 4"@@  - 5"AÀ qE@    - *A  k   , 6"A N"j"A  A J: *  AµÉ   /(A  k   , 6"A N"jÁ"A  A J" AµÉ N;(   AjAA   Aq AqI: 6  /$"AÿÿF\r E@A~ w!  Aj!  Aj!  Aj!  ( !A !@   "Aj"6 @@@ -  "A?M@   :        - 3 j":  AÿqA At/;(  - ,E@    - 2: *  - /A qE\rA !  A : 0 AM@A !@@@@@@@@@@@@@@@@@@@@@ A@j"`	\n\r    Aj6 Aó	 - :     Aj6 A¯\n - :     Aj6 Aë\n - :     Aj"6 A§ - :     Aj"6    - ": 2   : *   Aj"6  - !  AÀ A  AG: ,   : +   Aj6  - !   Aj"6    : +   - ": , AG\r   AÀ r: ,  A : +   Aj6  - !   Aj"6    : .   - : /   Aj"6    - : 1  A : 1   Aj"6     - 3 - j: 3   Aj"6    - : 3  A : 3\r - !   Aj"6    : 4A !   - AÀ A  AGj: 5  A : 4   Aj"6    - : 7\n  A : 7	  Aÿ: .   Aj"6    - : /  A : .   Aj"6 AÈ	 - :     Aj"6 A	 	 - j"	:  A	Aú  	Aÿqn;    Aj"6 A	 - "	:  A	Aú  	n;  \rE@  Aÿÿ;$  A : *AÊ	 \n q"\n:  Aÿ!A	Aÿ:  A	 A ts":    Aÿÿ;$  A : * AßM@ Ak!A !  ! AàF@@ AtAÿq ( ,  "Aÿ qr! Aj! A H\r  AÁ j! AüI\r  AýM@A ! AüG@   Aj"6  - !   Aj"6 A	( ! -  "  - \'G@   - "j  - &:     - "j  - \':     - ""Atj  k;    : \'   Aj: "  /$!   : &   A	(  Atj/ j"6  ! AþF@  - &"E@A	( "  - ""E\r   Ak": "     Aÿq"Atj/ j"6     j-  : &    j-  : \'   Ak: &A	( !A !   A	(   - \'Atj/ j"6 @ AtAÿq ( ,  "Aÿ qr! Aj! A H\r     j"6 A !   ;$ ! Aÿÿq"E\r  AÿÿF\r   Ak;$   Ak;$ Aj"AG\r@ \r  Aÿq vAq\r  AF@AÂ	  - *Av:   Al"  /(;²	   - *: °	  AÿqAIqE\r A§-  "A Aë\n-  "A¯\n-  "Aó	-  "jjkAÿqG@AÐ	A	( " A	( " Atj/ j6 Aô	A ; A\n    Atj/ j6 A°\nA ; AÈ\n    Atj/ j6 Aì\nA ;   Atj/ !Að!A	Að:  A   j6 A¨A ;  AI\r AÐ	A Aðü AüA :   Aj"AG@ ! A ! \r\rAÿA  AL" AÿN"@A   ü\n   A :  Aÿq"AM@Aü-  " AqE@A	A; AÄ	A; A¬A; AÉ	A:  A	Að:  A	A	-  "A ":  A	Aú  n; AôB 7 AìB 7 AäB 7 AÜB 7 AÔB 7 AÌB 7 AÄB 7 AÀA6 A	 :  AÊ	A t:   AÿqAF@AÄ	A; Aü  Ar:  A	A; ? AÐ	A Aðü A	Að:  A	Aÿ:  AÈ	A :  AÉ	A :  AÊ	A :  AüA :   Aü-  AvAqå@Aü-  Aq@A! A L\rA	/ !@A	 Ak";  AÿÿqE@A	AA	/ " AM; A	/ !A´	A´	/ A²	/ j"; Aº	Aº	/ A¸	/ j"; AÀ	AÀ	/ A¾	/ j"; AÄ	AÄ	/ "AvAq At"	r A\rvAqs;    AtjA A¶	-  "k  ÁA HA°	-  "A  k AþqAv"At qAIjA¼	,   AvAsÀlAvjA AÂ	-  "k  	ÁA HjÀ²C  ÀB8  Aj" G\r  A L\r  At"E\r   A  ü     $  #   kApq" $    # T~@  ­B|BøÿÿÿA	( " ­|"BÿÿÿÿX@ §"? AtM\r  \rAA06 AA	 6   á\'# Ak"\n$ @@@@@@@@@@@@  AôM@A( "A  AjAøq  AI"Av"v" Aq@@  AsAq j"At"A¬j"  (´"("F@A A~ wq6    6   6 Aj!   Ar6  j" (Ar6\r A( "M\r  @@   tA t" A   krqh"At"A¬j" (´" ("F@A A~ wq"6   6  6   Ar6   j"  k"Ar6   j 6  @ AxqA¬j!A( ! A Avt"qE@A  r6   (!  6  6  6  6  Aj! A 6 A 6 \rA( "E\r hAt(´"(Axq k! !@@ (" E@ (" E\r  (Axq k"   K"!    !  ! (!	  (" G@ ("  6   6 (" Aj ("E\r Aj!@ ! " Aj!  ("\r   Aj!  ("\r  A 6 A!  A¿K\r   Aj"Axq!A( "	E\r A!  AôÿÿM@ A& Avg" kvAq  AtkA>j!A  k!@@@ At(´"E@A ! A !  A AvkA  AGt!@@ (Axq k" O\r  ! "\r A ! !    ("   AvAqj("F   !  At! "\r    rE@A !A t" A   kr 	q" E\r  hAt(´!   E\r@  (Axq k" I!   !    !  ("   (" \r  E\r  A(  kO\r  (!  (" G@ ("  6   6\n (" Aj ("E\r Aj!@ ! " Aj!  ("\r   Aj!  ("\r  A 6 	 A( " M@A( !@   k"AO@  j" Ar6   j 6   Ar6   Ar6   j"   (Ar6A !A !A 6 A 6  Aj!  A( "I@A  k"6 AA( "  j"6   Ar6   Ar6  Aj! A !  A/j"AÜ( @Aä( AèB7 AàB 7 AÜ \nAjApqAØªÕªs6 AðA 6 AÀA 6 A "j"A  k"q" M\r\nA¼( "@A´( " j"	 M\r  	I\rAÀ-  Aq\r@@A( "@AÄ! @  ( " M@    (jI\r  (" \r A \n"AF\r !Aà( " Ak" q@  k  jA   kqj!  O\rA¼( " @A´( " j" M\r   I\r \n"  G\r  k q"\n"  (   (jF\r ! @  AF\r   A0jO\r Aä( "  kjA  kq"\nAF\r  j!  !  !  AG\rA ! A !  AG\rAÀAÀ( Ar6  \n!A \n!  AF\r  AF\r   M\r   k" A(jM\rA´A´(  j" 6 A¸(   I@A¸  6 @@@A( "@AÄ! @   ( "  ("jF\r  (" \r A( " A    ME@A 6 A ! AÈ 6 AÄ 6 A¤A6 A¨AÜ( 6 AÐA 6 @  At" A¬j"6´  6¸  Aj" A G\r A A(k" Ax kAq"k"6 A  j"6   Ar6   jA(6A Aì( 6   O\r   I\r   (Aq\r     j6A Ax kAq" j"6 AA(  j"  k" 6    Ar6  jA(6A Aì( 6 A(  K@A 6   j!AÄ! @@   ( "G@  (" \r  - AqE\rAÄ! @@  ( " M@    (j"I\r  (! A A(k" Ax kAq"k"6 A  j"6   Ar6   jA(6A Aì( 6   A\' kAqjA/k"    AjI"A6 AÌ) 7 AÄ) 7AÌ Aj6 AÈ 6 AÄ 6 AÐA 6  Aj! @  A6  Aj!  Aj!   I\r   F\r   (A~q6   k"Ar6  6  AÿM@ AøqA¬j! A( "A Avt"qE@A  r6     (!   6  6A!AA!  AÿÿÿM@ A& Avg" kvAq  AtrA>s!    6 B 7  AtA´j!@@A( "A  t"qE@A  r6   6   6 A  AvkA   AGt!  ( !@ "(Axq F\r  Av!  At!   Aqj"("\r   6  6A! ! ! A ("  6  6   6A ! A!A j 6   j  6 A( "  M\r A   k"6 AA( "  j"6   Ar6   Ar6  Aj! AA06 A !    6     ( j6 Ax kAqj"	 Ar6 Ax kAqj"  	j"k!@A(  F@A 6 AA(  j"6   Ar6A(  F@A 6 AA(  j"6   Ar6  j 6  ("AqAF@ Axq! (!@ AÿM@ ("  F@AA( A~ Avwq6    6   6 (!@  G@ (" 6  6@ (" Aj ("E\r Aj! @  ! "Aj!  ("\r  Aj!  ("\r  A 6 A ! E\r @ (" At"(´ F@ A´j 6  \rAA( A~  wq6 @  (F@  6  6 E\r  6 ("@  6  6 ("E\r   6  6  j"(!  j!  A~q6  Ar6  j 6  AÿM@ AøqA¬j!A( "A Avt"qE@A  r6   (!  6  6  6  6A! AÿÿÿM@ A& Avg"kvAq AtrA>s!  6 B 7 AtA´j!@@A( " A t"qE@A   r6   6   6 A AvkA  AGt! ( ! @  "(Axq F\r Av!  At!   Aqj"(" \r   6  6  6  6 (" 6  6 A 6  6  6 	Aj! @ E\r @ ("At"(´ F@ A´j  6   \rA 	A~ wq"	6 @  (F@   6   6  E\r   6 ("@   6   6 ("E\r    6   6@ AM@   j" Ar6   j"   (Ar6  Ar6  j" Ar6  j 6  AÿM@ AøqA¬j! A( "A Avt"qE@A  r6     (!   6  6   6  6A!  AÿÿÿM@ A& Avg" kvAq  AtrA>s!    6 B 7  AtA´j!@@ 	A  t"qE@A  	r6   6   6 A  AvkA   AGt!  ( !@ "(Axq F\r  Av!  At!   Aqj"("\r   6  6  6  6 ("  6  6 A 6  6   6 Aj! @ 	E\r @ ("At"(´ F@ A´j  6   \rA A~ wq6 @  	(F@ 	  6 	  6  E\r   	6 ("@   6   6 ("E\r    6   6@ AM@   j" Ar6   j"   (Ar6  Ar6  j" Ar6  j 6  @ AxqA¬j!A( ! A Avt" qE@A  r6   (!   6   6   6   6A 6 A 6  Aj!  \nAj$   á@  E\r   Ak"  Ak( "Axq" j!@ Aq\r  AqE\r  ( "k"A( I\r   j! @@@A(  G@ (! AÿM@  ("G\rAA( A~ Avwq6  (!  G@ (" 6  6 (" Aj ("E\r Aj!@ ! "Aj! ("\r  Aj! ("\r  A 6  ("AqAG\rA  6   A~q6   Ar6   6   6  6A ! E\r @ ("At"(´ F@ A´j 6  \rAA( A~ wq6 @  (F@  6  6 E\r  6 ("@  6  6 ("E\r   6  6  O\r  ("AqE\r @@@@ AqE@A(  F@A 6 AA(   j" 6    Ar6 A( G\rAA 6 AA 6 A( " F@A 6 AA(   j" 6    Ar6   j  6  Axq  j!  (! AÿM@ (" F@AA( A~ Avwq6   6  6 (!  G@ (" 6  6 (" Aj ("E\r Aj!@ ! "Aj! ("\r  Aj! ("\r  A 6   A~q6   Ar6   j  6 A ! E\r @ ("At"(´ F@ A´j 6  \rAA( A~ wq6 @  (F@  6  6 E\r  6 ("@  6  6 ("E\r   6  6   Ar6   j  6   G\r A  6   AÿM@  AøqA¬j!A( "A  Avt" qE@A   r6   (!   6   6  6   6A!  AÿÿÿM@  A&  Avg"kvAq AtrA>s!  6 B 7 AtA´j!@A( "A t"qE@A  r6   6 A!A  A AvkA  AGt! ( !@ "(Axq  F\r Av! At!  Aqj"("\r   6A! !A!  !  (" 6  6A! A!A !  j 6   6   j 6 A¤A¤( Ak"A 6  Aô( E@Aø 6 Aô  6  A~&7J]r¸Òî*Knºä?p¤ÜUÝ\'uÈ }àI¸-©-	¹	M\nê\n@úÀ\roZS[rÔ õ#Þ´ ¦"µ$ A	ðÿ  ')}function getBinarySync(file){return file}async function getWasmBinary(binaryFile){return getBinarySync(binaryFile)}async function instantiateArrayBuffer(binaryFile,imports){try{var binary=await getWasmBinary(binaryFile);var instance=await WebAssembly.instantiate(binary,imports);return instance}catch(reason){err(`failed to asynchronously prepare wasm: ${reason}`);abort(reason)}}async function instantiateAsync(binary,binaryFile,imports){return instantiateArrayBuffer(binaryFile,imports)}function getWasmImports(){var imports={env:wasmImports,wasi_snapshot_preview1:wasmImports};return imports}async function createWasm(){function receiveInstance(instance){wasmExports=instance.exports;assignWasmExports(wasmExports);updateMemoryViews();return wasmExports}function receiveInstantiationResult(result){return receiveInstance(result["instance"])}var info=getWasmImports();var instantiateWasm=Module["instantiateWasm"];if(instantiateWasm){return new Promise(resolve=>{instantiateWasm(info,inst=>resolve(receiveInstance(inst)))})}wasmBinaryFile??=findWasmBinary();var result=await instantiateAsync(wasmBinary,wasmBinaryFile,info);var exports=receiveInstantiationResult(result);return exports}class ExitStatus{name="ExitStatus";constructor(status){this.message=`Program terminated with exit(${status})`;this.status=status}}var callRuntimeCallbacks=callbacks=>{while(callbacks.length>0){callbacks.shift()(Module)}};var onPostRuns=[];var onPreRuns=[];var noExitRuntime=true;var stackRestore=val=>__emscripten_stack_restore(val);var stackSave=()=>_emscripten_stack_get_current();var abortOnCannotGrowMemory=requestedSize=>{abort("OOM")};var HEAPU8;var _emscripten_resize_heap=requestedSize=>{var oldSize=HEAPU8.length;requestedSize>>>=0;abortOnCannotGrowMemory(requestedSize)};var getCFunc=ident=>{var func=Module["_"+ident];return func};var HEAP8;var writeArrayToMemory=(array,buffer)=>{HEAP8.set(array,buffer)};var lengthBytesUTF8=str=>{var len=0;for(var i=0;i<str.length;++i){var c=str.charCodeAt(i);if(c<=127){len++}else if(c<=2047){len+=2}else if(c>=55296&&c<=57343){len+=4;++i}else{len+=3}}return len};var stringToUTF8Array=(str,heap,outIdx,maxBytesToWrite)=>{if(!(maxBytesToWrite>0))return 0;var startIdx=outIdx;var endIdx=outIdx+maxBytesToWrite-1;for(var i=0;i<str.length;++i){var u=str.codePointAt(i);if(u<=127){if(outIdx>=endIdx)break;heap[outIdx++]=u}else if(u<=2047){if(outIdx+1>=endIdx)break;heap[outIdx++]=192|u>>6;heap[outIdx++]=128|u&63}else if(u<=65535){if(outIdx+2>=endIdx)break;heap[outIdx++]=224|u>>12;heap[outIdx++]=128|u>>6&63;heap[outIdx++]=128|u&63}else{if(outIdx+3>=endIdx)break;heap[outIdx++]=240|u>>18;heap[outIdx++]=128|u>>12&63;heap[outIdx++]=128|u>>6&63;heap[outIdx++]=128|u&63;i++}}heap[outIdx]=0;return outIdx-startIdx};var stringToUTF8=(str,outPtr,maxBytesToWrite)=>stringToUTF8Array(str,HEAPU8,outPtr,maxBytesToWrite);var stackAlloc=sz=>__emscripten_stack_alloc(sz);var stringToUTF8OnStack=str=>{var size=lengthBytesUTF8(str)+1;var ret=stackAlloc(size);stringToUTF8(str,ret,size);return ret};var UTF8Decoder=globalThis.TextDecoder&&new TextDecoder;var findStringEnd=(heapOrArray,idx,maxBytesToRead,ignoreNul)=>{var maxIdx=idx+maxBytesToRead;if(ignoreNul)return maxIdx;while(heapOrArray[idx]&&!(idx>=maxIdx))++idx;return idx};var UTF8ArrayToString=(heapOrArray,idx=0,maxBytesToRead,ignoreNul)=>{var endPtr=findStringEnd(heapOrArray,idx,maxBytesToRead,ignoreNul);if(endPtr-idx>16&&heapOrArray.buffer&&UTF8Decoder){return UTF8Decoder.decode(heapOrArray.subarray(idx,endPtr))}var str="";while(idx<endPtr){var u0=heapOrArray[idx++];if(!(u0&128)){str+=String.fromCharCode(u0);continue}var u1=heapOrArray[idx++]&63;if((u0&224)==192){str+=String.fromCharCode((u0&31)<<6|u1);continue}var u2=heapOrArray[idx++]&63;if((u0&240)==224){u0=(u0&15)<<12|u1<<6|u2}else{u0=(u0&7)<<18|u1<<12|u2<<6|heapOrArray[idx++]&63}if(u0<65536){str+=String.fromCharCode(u0)}else{var ch=u0-65536;str+=String.fromCharCode(55296|ch>>10,56320|ch&1023)}}return str};var UTF8ToString=(ptr,maxBytesToRead,ignoreNul)=>ptr?UTF8ArrayToString(HEAPU8,ptr,maxBytesToRead,ignoreNul):"";var ccall=(ident,returnType,argTypes,args,opts)=>{var toC={string:str=>{var ret=0;if(str!==null&&str!==undefined&&str!==0){ret=stringToUTF8OnStack(str)}return ret},array:arr=>{var ret=stackAlloc(arr.length);writeArrayToMemory(arr,ret);return ret}};function convertReturnValue(ret){if(returnType==="string"){return UTF8ToString(ret)}if(returnType==="boolean")return Boolean(ret);return ret}var func=getCFunc(ident);var cArgs=[];var stack=0;if(args){for(var i=0;i<args.length;i++){var converter=toC[argTypes[i]];if(converter){if(!stack)stack=stackSave();cArgs[i]=converter(args[i])}else{cArgs[i]=args[i]}}}var ret=func(...cArgs);function onDone(ret){if(stack)stackRestore(stack);return convertReturnValue(ret)}ret=onDone(ret);return ret};var cwrap=(ident,returnType,argTypes,opts)=>{var numericArgs=!argTypes||argTypes.every(type=>type==="number"||type==="boolean");var numericRet=returnType!=="string";if(numericRet&&numericArgs&&!opts){return getCFunc(ident)}return(...args)=>ccall(ident,returnType,argTypes,args,opts)};var HEAP16;var HEAP32;var HEAPU32;var HEAPF32;var HEAPF64;var HEAP64;function getValue(ptr,type="i8"){if(type.endsWith("*"))type="*";switch(type){case"i1":return HEAP8[ptr];case"i8":return HEAP8[ptr];case"i16":return HEAP16[ptr>>1];case"i32":return HEAP32[ptr>>2];case"i64":return HEAP64[ptr>>3];case"float":return HEAPF32[ptr>>2];case"double":return HEAPF64[ptr>>3];case"*":return HEAPU32[ptr>>2];default:abort(`invalid type for getValue: ${type}`)}}function setValue(ptr,value,type="i8"){if(type.endsWith("*"))type="*";switch(type){case"i1":HEAP8[ptr]=value;break;case"i8":HEAP8[ptr]=value;break;case"i16":HEAP16[ptr>>1]=value;break;case"i32":HEAP32[ptr>>2]=value;break;case"i64":HEAP64[ptr>>3]=BigInt(value);break;case"float":HEAPF32[ptr>>2]=value;break;case"double":HEAPF64[ptr>>3]=value;break;case"*":HEAPU32[ptr>>2]=value;break;default:abort(`invalid type for setValue: ${type}`)}}{if(Module["noExitRuntime"])noExitRuntime=Module["noExitRuntime"];if(Module["print"])out=Module["print"];if(Module["printErr"])err=Module["printErr"];if(Module["arguments"])programArgs=Module["arguments"];if(Module["thisProgram"])thisProgram=Module["thisProgram"];var preInit=Module["preInit"];if(preInit){if(typeof preInit=="function")Module["preInit"]=preInit=[preInit];while(preInit.length>0){preInit.shift()()}}}Module["cwrap"]=cwrap;Module["setValue"]=setValue;Module["getValue"]=getValue;var _ATM_playroutine,_atm_sfx,_atm_stop,_atm_active,_atm_render,_malloc,_free,_setThrew,__emscripten_stack_restore,__emscripten_stack_alloc,_emscripten_stack_get_current,memory,_cia_count,_cia,_osc,_pcm,_half,__indirect_function_table,wasmMemory;function assignWasmExports(wasmExports){_ATM_playroutine=Module["_ATM_playroutine"]=wasmExports["ATM_playroutine"];_atm_sfx=Module["_atm_sfx"]=wasmExports["atm_sfx"];_atm_stop=Module["_atm_stop"]=wasmExports["atm_stop"];_atm_active=Module["_atm_active"]=wasmExports["atm_active"];_atm_render=Module["_atm_render"]=wasmExports["atm_render"];_malloc=Module["_malloc"]=wasmExports["malloc"];_free=Module["_free"]=wasmExports["free"];_setThrew=wasmExports["setThrew"];__emscripten_stack_restore=wasmExports["_emscripten_stack_restore"];__emscripten_stack_alloc=wasmExports["_emscripten_stack_alloc"];_emscripten_stack_get_current=wasmExports["emscripten_stack_get_current"];memory=wasmMemory=wasmExports["memory"];_cia_count=Module["_cia_count"]=wasmExports["cia_count"].value;_cia=Module["_cia"]=wasmExports["cia"].value;_osc=Module["_osc"]=wasmExports["osc"].value;_pcm=Module["_pcm"]=wasmExports["pcm"].value;_half=Module["_half"]=wasmExports["half"].value;__indirect_function_table=wasmExports["__indirect_function_table"]}var wasmImports={emscripten_resize_heap:_emscripten_resize_heap};async function run(){preRun();var setStatus=Module["setStatus"];if(setStatus){setStatus("Running...");await new Promise(resolve=>setTimeout(resolve,1));setTimeout(setStatus,1,"")}if(ABORT)return;initRuntime();Module["onRuntimeInitialized"]?.();postRun()}var wasmExports;wasmExports=await createWasm();await run();
+;return Module}})();if(typeof exports==="object"&&typeof module==="object"){module.exports=AtmLib;module.exports.default=AtmLib}else if(typeof define==="function"&&define["amd"])define([],()=>AtmLib);
+
+</script>
 <script>
 const NOTE_NAMES = (() => {
   const n = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
@@ -272,21 +277,77 @@ function ensureAudio() {
   if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
   return actx;
 }
-function liveVoice(atm, on, id) {
+let atmMod = null, atmSfx = null, atmRender = null, atmStop = null, atmNode = null, atmPtr = 0, atmPhase = 0;
+const ATM_SR = 31250;
+async function ensureAtm() {
   ensureAudio();
-  if (on) {
-    if (voices[id]) return;
-    const o = actx.createOscillator();
-    const g = actx.createGain();
-    o.type = "square";
-    o.frequency.value = atmToFreq(atm);
-    g.gain.value = 0.08;
-    o.connect(g); g.connect(actx.destination); o.start();
-    voices[id] = {node: o, g};
-  } else if (voices[id]) {
-    try { voices[id].g.gain.setTargetAtTime(0.0001, actx.currentTime, 0.03); voices[id].node.stop(actx.currentTime + 0.08); } catch (e) {}
-    delete voices[id];
+  if (!atmMod) {
+    atmMod = await AtmLib();
+    atmSfx = atmMod.cwrap("atm_sfx", null, ["number", "number", "number"]);
+    atmRender = atmMod.cwrap("atm_render", "number", ["number", "number"]);
+    atmStop = atmMod.cwrap("atm_stop", null, []);
+    atmPtr = atmMod._malloc(4096 * 4);
+    atmNode = actx.createScriptProcessor(2048, 1, 1);
+    atmNode.onaudioprocess = e => {
+      const out = e.outputBuffer.getChannelData(0);
+      const step = ATM_SR / actx.sampleRate;
+      const need = Math.ceil(out.length * step) + 2;
+      atmRender(atmPtr, need);
+      const src = atmMod.HEAPF32.subarray(atmPtr / 4, atmPtr / 4 + need);
+      let pos = atmPhase;
+      for (let i = 0; i < out.length; i++) {
+        const i0 = Math.floor(pos);
+        out[i] = src[i0] || 0;
+        pos += step;
+      }
+      atmPhase = pos % 1;
+    };
+    atmNode.connect(actx.destination);
   }
+  if (actx.state === "suspended") await actx.resume();
+}
+function playAtmBytes(bytes, ch) {
+  const p = atmMod._malloc(bytes.length);
+  atmMod.HEAPU8.set(bytes, p);
+  atmSfx(p, bytes.length, ch || 0);
+  atmMod._free(p);
+  atmPhase = 0;
+}
+function buildTrack() {
+  const ev = Array.from({length: state.len}, () => []);
+  state.fxLines.forEach(line => {
+    line.cells.forEach((c, i) => {
+      if (!c || !line.effect) return;
+      if (line.effect === "vol") ev[i].push(0x40, c.v & 63);
+      else if (line.effect === "slvol") ev[i].push(0x41, c.d & 255);
+      else if (line.effect === "slvola") ev[i].push(0x42, c.a & 255, c.t & 63);
+      else if (line.effect === "slvoloff") ev[i].push(0x43);
+    });
+  });
+  for (let i = 0; i < state.len; i++) {
+    const s = state.steps[i];
+    if (s.note && s.hold > 0) ev[i].push(s.note & 63);
+  }
+  const out = [];
+  let t = 0;
+  while (t < state.len) {
+    out.push(...ev[t]);
+    let n = t + 1;
+    while (n < state.len && !ev[n].length) n++;
+    let left = n - t;
+    while (left > 0) {
+      const d = Math.min(64, left);
+      out.push(0x9F + d);
+      left -= d;
+    }
+    t = n;
+  }
+  out.push(0x9F);
+  return out;
+}
+function liveVoice(note, on, id) {
+  if (!on) return;
+  ensureAtm().then(() => playAtmBytes([0x40, 48, note & 63, 0xA4, 0x9F], 0));
 }
 
 function placeNote(atm, i) {
@@ -710,31 +771,15 @@ let timer = null;
 function togglePlay() { state.playing ? stopPlay() : startPlay(); }
 function startPlay() {
   if (state.mode !== "sfx") return;
-  ensureAudio();
   state.playing = true;
   document.getElementById("btnPlay").classList.add("active");
-  let i = 0;
-  const step = () => {
-    if (!state.playing) return;
-    state.sel = i;
-    const s = state.steps[i];
-    if (s && s.note && s.hold > 0) {
-      liveVoice(0, false, "play");
-      liveVoice(s.note, true, "play");
-      paintPiano(s.note, true);
-    }
-    renderScore();
-    i++;
-    if (i >= state.len) { stopPlay(); return; }
-    timer = setTimeout(step, 140);
-  };
-  step();
+  ensureAtm().then(() => playAtmBytes(buildTrack(), 0));
 }
 function stopPlay() {
   state.playing = false;
   document.getElementById("btnPlay").classList.remove("active");
   if (timer) clearTimeout(timer);
-  liveVoice(0, false, "play");
+  if (atmStop) atmStop();
   pianoEl.querySelectorAll(".on").forEach(el => el.classList.remove("on"));
 }
 document.getElementById("btnPlay").onclick = startPlay;
