@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ATMlib Track Editor v0.0.4</title>
+<title>ATMlib Track Editor v0.0.5</title>
 <link href="https://fonts.googleapis.com/css?family=Cookie&display=swap" rel="stylesheet" />
 <style>
   :root {
@@ -174,7 +174,7 @@
   <a class="site-logo" href="https://t-arg.github.io/" title="TEAM a.r.g." target="_blank" rel="noopener noreferrer">
     <img src="data:image/gif;base64,R0lGODlheQAuAMIFAEc8Okg8OUY9Nk5BPv7+/P///////////yH+EUNyZWF0ZWQgd2l0aCBHSU1QACH5BAEKAAcALAAAAAB5AC4AAAP+eHrRHivKSau9OOudA/kf4HBkaZ5PCnEe6DrDKc/z0LpfEG83DqrAxo5GNNk+tkduiOklB74oTheswipJq5CSvSqOBHDux7T0WjCptKeO6iTJ9uu9EJMP4Dz0XKacpw8DXYFyhXR4bIUEh4lLLWINi1N9En9hUIBrSFoqmItfTlaeizF5aZJhjR6Cd2Yve6o4rDqoiks5iCBxakJkjze0m7qeHr24ri9twTlopLY/uDd2ysGRtbdiT2OLwILeOw5Tco2oy4q0VMLPzrqJ6T/h13MPCsU4AIMpAFL428/Fj/b5+KYJWhSBLkQY9BGpGKJp8v75wyGgokUBY6w16jL+ioy6dRPn2LDBgBtDkAbNwUshyF6qgSpcsCoHciY5ew0Y7Hp1aV01W+EAMgQyZwzEcc3cjMzZ0I1JnyF5WXspa+rNeCifDpUEQchUeMy+AopHzg0adw3fwTxqi61XkgA7ivjmDaEsb2jsUvu4UslBrFnL4uyapSqQjn3RIA7rV2HWTWJBkptLZQFAYFrWYL3KUi1Kv48jQua2AJ+xVEDm8tv8zLRZ0DAD6I3KSzOVFfVEnA3CjTNYoJFjvlZV9qRZESIipOhNFHDR38DHwp5H3J3T4TmVB+XNbHYOux4AeL+eODIB3Y3Q34uFfYKSKiuZPTe6mLkD9ETlM8YeP1P+e/foISebPOHMtBBXux2Wj3A92cfJfvKZx41ufsDHxnYQMsbJdvnpt6EVw4imYQWylShgdeLFlOCDCN6X4gMvarHPgwMKJiCJ8A1loYYf2lfeh5dlJqJ9OHKnY3M8inLEckkK1xyQto1QSYp03YddGsg5qANdg1xioJaBrJiWV1S0NF1f7kUyI2bBWRgJlwseKROceM35zSp7tMSNmebRU0lYjOkpHSFbFhfaY+OBIB6fR1ZSTGG3pTgojIvECOSlmLJ4Hj47LUGSZUFyqF+TsPAYJTVnUscgczsJYYef9Ty1HIMs1XlbGUFol6ujuxaJGwOmYQaJH6TAkA6DVQbN1YWuQIBaBbPNkvjErwzcBl1X9JiyCjN4GXpMmlbUE8ggzm65LIkvVBAsQ8Cet4K2jkDXxqe8unpuCqBIGUgd3iDzLQUC5BMDTnUIhAk+JT1aBXgVSlltdviKSwesGwwgEMIo/BABJOBo7O8n4Gb38AoRVzsErCpY8EQNXtTRchaUuLxEw0Hs0G3JeJgp8ZZF9HzCyjRHqx259VLs89E915rFyNUiMgI9uRqN9NQsoMxUNO8+jXXKaFDtNQl08VvKFoKI7XQpcJ79tQQJAAA7" alt="TEAM a.r.g.">
   </a>
-  <h1>ATMlib Track Editor <span style="color:#6b5f5e;font-weight:500">v0.0.4</span></h1>
+  <h1>ATMlib Track Editor <span style="color:#6b5f5e;font-weight:500">v0.0.5</span></h1>
   <button id="btnNewSong" type="button">New ATM song</button>
   <button id="btnNewSfx" type="button">New ATM sound effect</button>
   <button id="btnImport" type="button">Import songs.h</button>
@@ -318,18 +318,17 @@ function noteMacro(n) {
   return "ATM_NOTE_" + nm.replace("#", "_");
 }
 function fxMacro(effect, cell) {
-  if (effect === "vol") return "ATM_VOL(" + cell.v + ")";
-  if (effect === "slvol") return "ATM_SL_VOL(" + cell.d + ")";
-  if (effect === "slvola") return "ATM_SL_VOL_ADV(" + cell.a + ", " + cell.t + ")";
-  if (effect === "slvoloff") return "ATM_SL_VOL_OFF";
-  return effect;
+  const d = FX_DEFS[effect];
+  if (!d) return effect;
+  if (d.macro) return d.macro(cell);
+  if (!d.args.length) return d.mac;
+  return d.mac + "(" + d.args.map(a => cell[a.k]).join(", ") + ")";
 }
 function fxBytes(effect, cell) {
-  if (effect === "vol") return [0x40, cell.v & 63];
-  if (effect === "slvol") return [0x41, cell.d & 255];
-  if (effect === "slvola") return [0x42, cell.a & 255, cell.t & 63];
-  if (effect === "slvoloff") return [0x43];
-  return [];
+  const d = FX_DEFS[effect];
+  if (!d) return [];
+  if (d.encode) return d.encode(cell);
+  return [d.op].concat(d.args.map(a => cell[a.k] & 255));
 }
 function scoreProgram() {
   const has = Array.from({length: state.len}, () => false);
@@ -855,10 +854,30 @@ setInterval(() => {
 }, 140);
 
 const FX_DEFS = {
-  vol: { name: "Set volume", short: "VOL", mac: "ATM_VOL", color: "#5d4c4b", hint: "0–63", args: [{k:"v", label:"volume", min:0, max:63, def:48}] },
-  slvol: { name: "Volume slide", short: "SL", mac: "ATM_SL_VOL", color: "#3d5c4a", hint: "−63–64", args: [{k:"d", label:"slide", min:-63, max:64, def:-8}] },
-  slvola: { name: "Volume slide advanced", short: "SLA", mac: "ATM_SL_VOL_ADV", color: "#3d4a6b", hint: "amount −63–63, per ticks 0–63", args: [{k:"a", label:"amount", min:-63, max:63, def:-4}, {k:"t", label:"per ticks", min:0, max:63, def:2}] },
-  slvoloff: { name: "Slide volume off", short: "OFF", mac: "ATM_SL_VOL_OFF", color: "#6b3d3d", hint: "no value", args: [] }
+  vol: { name: "Set volume", short: "VOL", mac: "ATM_VOL", color: "#5d4c4b", hint: "0–63", op: 0x40, args: [{k:"v", label:"volume", min:0, max:63, def:48}] },
+  slvol: { name: "Volume slide", short: "SLV", mac: "ATM_SL_VOL", color: "#3d5c4a", hint: "−63–64 per tick", op: 0x41, args: [{k:"d", label:"slide", min:-63, max:64, def:-8}] },
+  slvola: { name: "Volume slide advanced", short: "SLVA", mac: "ATM_SL_VOL_ADV", color: "#3d4a6b", hint: "amount −63–63, per ticks 0–63", op: 0x42, args: [{k:"a", label:"amount", min:-63, max:63, def:-4}, {k:"t", label:"per ticks", min:0, max:63, def:2}] },
+  slvoloff: { name: "Slide volume off", short: "SVOFF", mac: "ATM_SL_VOL_OFF", color: "#6b3d3d", hint: "stops the volume slide", op: 0x43, args: [] },
+  slfrq: { name: "Frequency slide", short: "SLF", mac: "ATM_SL_FRQ", color: "#3d6b5c", hint: "−127–127 per tick", op: 0x44, args: [{k:"d", label:"slide", min:-127, max:127, def:8}] },
+  slfrqa: { name: "Frequency slide advanced", short: "SLFA", mac: "ATM_SL_FRQ_ADV", color: "#2f5d6b", hint: "amount −127–127, per ticks 0–63", op: 0x45, args: [{k:"a", label:"amount", min:-127, max:127, def:4}, {k:"t", label:"per ticks", min:0, max:63, def:2}] },
+  slfrqoff: { name: "Slide frequency off", short: "SFOFF", mac: "ATM_SL_FRQ_OFF", color: "#6b4a3d", hint: "stops the frequency slide", op: 0x46, args: [] },
+  arp: { name: "Arpeggio", short: "ARP", mac: "ATM_ARP", color: "#6b5a3d", hint: "second/third 0–15, ticks 0–31", op: 0x47, args: [{k:"s", label:"second", min:0, max:15, def:4}, {k:"r", label:"third", min:0, max:15, def:7}, {k:"t", label:"ticks", min:0, max:31, def:2}, {k:"n", label:"no third", min:0, max:1, def:0}, {k:"g", label:"retrigger", min:0, max:1, def:0}], encode(c){ return [0x47, ((c.s & 15) << 4) | (c.r & 15), ((c.n ? 0x40 : 0) | (c.g ? 0x20 : 0) | (c.t & 31)) & 255]; }, macro(c){ return "ATM_ARP(" + ((c.s & 15) << 4 | (c.r & 15)) + ", " + (((c.n ? 0x40 : 0) | (c.g ? 0x20 : 0) | (c.t & 31)) & 255) + ")"; } },
+  arpoff: { name: "Arpeggio off", short: "ARPOFF", mac: "ATM_ARP_OFF", color: "#5c5348", hint: "stops the arpeggio", op: 0x48, args: [] },
+  noise: { name: "Noise retrigger", short: "NSE", mac: "ATM_NOISE", color: "#4a4a6b", hint: "entry 0–63, speed 0 fastest … 2 fast", op: 0x49, args: [{k:"e", label:"entry", min:0, max:63, def:1}, {k:"s", label:"speed", min:0, max:3, def:0}], encode(c){ return [0x49, ((c.e & 63) << 2) | (c.s & 3)]; }, macro(c){ return "ATM_NOISE(" + (((c.e & 63) << 2) | (c.s & 3)) + ")"; } },
+  noiseoff: { name: "Noise retrigger off", short: "NSEOFF", mac: "ATM_NOISE_OFF", color: "#3d3d5c", hint: "stops noise retrigger", op: 0x4A, args: [] },
+  addtra: { name: "Add transposition", short: "TRA+", mac: "ATM_ADD_TRA", color: "#5c3d6b", hint: "−127–127", op: 0x4B, args: [{k:"a", label:"semitones", min:-127, max:127, def:12}] },
+  settra: { name: "Set transposition", short: "TRA", mac: "ATM_SET_TRA", color: "#6b3d5c", hint: "−127–127", op: 0x4C, args: [{k:"a", label:"semitones", min:-127, max:127, def:0}] },
+  traoff: { name: "Transposition off", short: "TRAOFF", mac: "ATM_TRA_OFF", color: "#4a3d4a", hint: "stops transposition", op: 0x4D, args: [] },
+  trem: { name: "Tremolo", short: "TREM", mac: "ATM_TREM", color: "#6b3d4a", hint: "depth 0–127, rate 0–31", op: 0x4E, args: [{k:"d", label:"depth", min:0, max:127, def:8}, {k:"r", label:"rate", min:0, max:31, def:4}] },
+  tremoff: { name: "Tremolo off", short: "TROFF", mac: "ATM_TREM_OFF", color: "#5c3d44", hint: "stops tremolo", op: 0x4F, args: [] },
+  vib: { name: "Vibrato", short: "VIB", mac: "ATM_VIB", color: "#3d5c6b", hint: "depth 0–127, rate 0–31", op: 0x50, args: [{k:"d", label:"depth", min:0, max:127, def:8}, {k:"r", label:"rate", min:0, max:31, def:4}] },
+  viboff: { name: "Vibrato off", short: "VIOFF", mac: "ATM_VIB_OFF", color: "#3d4a5c", hint: "stops vibrato", op: 0x51, args: [] },
+  glis: { name: "Glissando", short: "GLIS", mac: "ATM_GLIS", color: "#6b5c3d", hint: "0 up / 1 down, ticks 0–127", op: 0x52, args: [{k:"v", label:"down", min:0, max:1, def:0}, {k:"t", label:"ticks", min:0, max:127, def:2}], encode(c){ return [0x52, ((c.v ? 0x80 : 0) | (c.t & 127)) & 255]; }, macro(c){ return "ATM_GLIS(" + (((c.v ? 0x80 : 0) | (c.t & 127)) & 255) + ")"; } },
+  glisoff: { name: "Glissando off", short: "GLOFF", mac: "ATM_GLIS_OFF", color: "#5c4a3d", hint: "stops glissando", op: 0x53, args: [] },
+  cut: { name: "Note cut", short: "CUT", mac: "ATM_CUT", color: "#6b3d3d", hint: "ticks between note on and off", op: 0x54, args: [{k:"t", label:"ticks", min:0, max:255, def:4}] },
+  cutoff: { name: "Note cut off", short: "CUTOFF", mac: "ATM_CUT_OFF", color: "#4a3030", hint: "stops note cut", op: 0x55, args: [] },
+  addtmp: { name: "Add song tempo", short: "TMP+", mac: "ATM_ADD_TEMPO", color: "#3d5c3d", hint: "0–127 added to the song tempo", op: 0x9C, args: [{k:"a", label:"amount", min:0, max:127, def:1}] },
+  settmp: { name: "Set song tempo", short: "TMP", mac: "ATM_SET_TEMPO", color: "#3d6b3d", hint: "0–127, standard is 25", op: 0x9D, args: [{k:"a", label:"tempo", min:0, max:127, def:25}] }
 };
 const palette = {};
 function freshCell(id) {
