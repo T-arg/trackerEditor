@@ -71,9 +71,12 @@
   .ruler { height: 18px; margin-left: 0; color: var(--muted); font: 10px ui-monospace, monospace; }
   .tickmark { width: 28px; flex: none; text-align: center; }
   .lane {
-    display: flex; min-height: 72px; background: #fff; border: 1px solid #4a3b3a;
+    display: flex; min-height: 36px; background: #fff; border: 1px solid #4a3b3a;
     border-radius: 6px; position: relative;
   }
+  .lane.score { height: 44px; }
+  .lane.score .cell { height: 28px; }
+  .lane.drop { outline: 2px dashed #4a3b3a; }
   .cell {
     width: 28px; flex: none; height: 72px; border-right: 1px solid #e4e0dc;
     position: relative; cursor: pointer;
@@ -83,8 +86,8 @@
   .cell.beat { background: #f5f5f3; }
   .cell.sel.beat { background: #f4d35e88; }
   .note {
-    position: absolute; top: 16px; height: 40px; border-radius: 4px;
-    background: #4a3b3a; color: #fefefd; font: 700 11px/40px ui-monospace, monospace;
+    position: absolute; top: 18px; height: 22px; border-radius: 4px;
+    background: #4a3b3a; color: #fefefd; font: 700 10px/22px ui-monospace, monospace;
     text-align: center; overflow: hidden; cursor: grab; z-index: 2; user-select: none;
   }
   .note .edge {
@@ -436,6 +439,7 @@ function buildRow(kind, line, idx) {
     btn.title = "Delete this effect line";
     btn.onclick = () => {
       state.fxLines.splice(idx, 1);
+      if (!state.fxLines.length) state.fxLines.push(blankFxLine());
       state.selFx = null;
       state.dirty = true;
       renderScore();
@@ -443,7 +447,7 @@ function buildRow(kind, line, idx) {
   }
   gutter.appendChild(btn);
   const lane = document.createElement("div");
-  lane.className = "lane" + (kind === "fx" ? " fx" : "");
+  lane.className = "lane" + (kind === "fx" ? " fx" : " score");
   lane.style.width = (state.len * 28) + "px";
   lane.dataset.kind = kind;
   if (line) lane.dataset.line = String(idx);
@@ -459,7 +463,6 @@ function buildRow(kind, line, idx) {
     }
     lane.appendChild(ruler);
     lane.style.paddingTop = "16px";
-    lane.style.height = "88px";
   }
   for (let i = 0; i < state.len; i++) {
     const cell = document.createElement("div");
@@ -476,14 +479,20 @@ function buildRow(kind, line, idx) {
       note.className = "note";
       note.style.left = (i * 28 + 1) + "px";
       note.style.width = (st.hold * 28 - 4) + "px";
-      note.style.top = "28px";
+      note.style.top = "18px";
       note.textContent = NOTE_NAMES[st.note] || st.note;
       const edge = document.createElement("div");
       edge.className = "edge";
       note.appendChild(edge);
-      bindNoteDrag(note, edge, i);
+      note.draggable = true;
+      note.ondragstart = ev => {
+        if (ev.target === edge) { ev.preventDefault(); return; }
+        ev.dataTransfer.setData("text/plain", JSON.stringify({ from: "note", tick: i, dur: st.hold, atm: st.note }));
+        ev.dataTransfer.effectAllowed = "move";
+      };
       lane.appendChild(note);
     }
+    enableScoreDrop(lane);
   } else {
     enableFxDrop(lane, idx);
     line.cells.forEach((c, i) => {
@@ -557,28 +566,31 @@ function enableFxDrop(lane, idx) {
     renderScore();
   };
 }
-function bindNoteDrag(note, edge, head) {
-  note.onmousedown = e => {
-    if (e.target === edge) return;
+function enableScoreDrop(lane) {
+  lane.ondragover = e => {
+    const types = e.dataTransfer.types || [];
+    if (!types.includes("text/plain") && !e.dataTransfer.getData) return;
     e.preventDefault();
-    const origin = e.clientX;
-    const start = head;
-    const dur = state.steps[head].hold;
-    const atm = state.steps[head].note;
-    function move(ev) {
-      const dx = Math.round((ev.clientX - origin) / 28);
-      const dest = Math.max(0, Math.min(state.len - dur, start + dx));
-      if (dest === head) return;
-      paintMove(start, dest, dur, atm);
-    }
-    function up() {
-      window.removeEventListener("mousemove", move);
-      window.removeEventListener("mouseup", up);
-      renderScore();
-    }
-    window.addEventListener("mousemove", move);
-    window.addEventListener("mouseup", up);
+    lane.classList.add("drop");
+    e.dataTransfer.dropEffect = "move";
+    const tick = tickFromEvent(lane, e);
+    lane.querySelectorAll(".cell").forEach(c => c.classList.toggle("sel", +c.dataset.i === tick));
   };
+  lane.ondragleave = () => lane.classList.remove("drop");
+  lane.ondrop = e => {
+    e.preventDefault();
+    lane.classList.remove("drop");
+    let data = {};
+    try { data = JSON.parse(e.dataTransfer.getData("text/plain") || "{}"); } catch (err) {}
+    if (data.from !== "note") return;
+    const tick = tickFromEvent(lane, e);
+    const dest = Math.max(0, Math.min(state.len - data.dur, tick));
+    if (dest !== data.tick) paintMove(data.tick, dest, data.dur, data.atm);
+    state.sel = dest;
+    renderScore();
+  };
+}
+function bindNoteDrag(note, edge, head) {
   edge.onmousedown = e => {
     e.preventDefault();
     e.stopPropagation();
@@ -636,7 +648,7 @@ function newSfx() {
   state.steps = blankSteps(32);
   state.len = 32;
   state.sel = 0;
-  state.fxLines = [];
+  state.fxLines = [blankFxLine()];
   state.selFx = null;
   state.recording = true;
   state.dirty = false;
