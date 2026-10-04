@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ATMlib Track Editor v0.0.3</title>
+<title>ATMlib Track Editor v0.0.4</title>
 <link href="https://fonts.googleapis.com/css?family=Cookie&display=swap" rel="stylesheet" />
 <style>
   :root {
@@ -174,7 +174,7 @@
   <a class="site-logo" href="https://t-arg.github.io/" title="TEAM a.r.g." target="_blank" rel="noopener noreferrer">
     <img src="data:image/gif;base64,R0lGODlheQAuAMIFAEc8Okg8OUY9Nk5BPv7+/P///////////yH+EUNyZWF0ZWQgd2l0aCBHSU1QACH5BAEKAAcALAAAAAB5AC4AAAP+eHrRHivKSau9OOudA/kf4HBkaZ5PCnEe6DrDKc/z0LpfEG83DqrAxo5GNNk+tkduiOklB74oTheswipJq5CSvSqOBHDux7T0WjCptKeO6iTJ9uu9EJMP4Dz0XKacpw8DXYFyhXR4bIUEh4lLLWINi1N9En9hUIBrSFoqmItfTlaeizF5aZJhjR6Cd2Yve6o4rDqoiks5iCBxakJkjze0m7qeHr24ri9twTlopLY/uDd2ysGRtbdiT2OLwILeOw5Tco2oy4q0VMLPzrqJ6T/h13MPCsU4AIMpAFL428/Fj/b5+KYJWhSBLkQY9BGpGKJp8v75wyGgokUBY6w16jL+ioy6dRPn2LDBgBtDkAbNwUshyF6qgSpcsCoHciY5ew0Y7Hp1aV01W+EAMgQyZwzEcc3cjMzZ0I1JnyF5WXspa+rNeCifDpUEQchUeMy+AopHzg0adw3fwTxqi61XkgA7ivjmDaEsb2jsUvu4UslBrFnL4uyapSqQjn3RIA7rV2HWTWJBkptLZQFAYFrWYL3KUi1Kv48jQua2AJ+xVEDm8tv8zLRZ0DAD6I3KSzOVFfVEnA3CjTNYoJFjvlZV9qRZESIipOhNFHDR38DHwp5H3J3T4TmVB+XNbHYOux4AeL+eODIB3Y3Q34uFfYKSKiuZPTe6mLkD9ETlM8YeP1P+e/foISebPOHMtBBXux2Wj3A92cfJfvKZx41ufsDHxnYQMsbJdvnpt6EVw4imYQWylShgdeLFlOCDCN6X4gMvarHPgwMKJiCJ8A1loYYf2lfeh5dlJqJ9OHKnY3M8inLEckkK1xyQto1QSYp03YddGsg5qANdg1xioJaBrJiWV1S0NF1f7kUyI2bBWRgJlwseKROceM35zSp7tMSNmebRU0lYjOkpHSFbFhfaY+OBIB6fR1ZSTGG3pTgojIvECOSlmLJ4Hj47LUGSZUFyqF+TsPAYJTVnUscgczsJYYef9Ty1HIMs1XlbGUFol6ujuxaJGwOmYQaJH6TAkA6DVQbN1YWuQIBaBbPNkvjErwzcBl1X9JiyCjN4GXpMmlbUE8ggzm65LIkvVBAsQ8Cet4K2jkDXxqe8unpuCqBIGUgd3iDzLQUC5BMDTnUIhAk+JT1aBXgVSlltdviKSwesGwwgEMIo/BABJOBo7O8n4Gb38AoRVzsErCpY8EQNXtTRchaUuLxEw0Hs0G3JeJgp8ZZF9HzCyjRHqx259VLs89E915rFyNUiMgI9uRqN9NQsoMxUNO8+jXXKaFDtNQl08VvKFoKI7XQpcJ79tQQJAAA7" alt="TEAM a.r.g.">
   </a>
-  <h1>ATMlib Track Editor <span style="color:#6b5f5e;font-weight:500">v0.0.3</span></h1>
+  <h1>ATMlib Track Editor <span style="color:#6b5f5e;font-weight:500">v0.0.4</span></h1>
   <button id="btnNewSong" type="button">New ATM song</button>
   <button id="btnNewSfx" type="button">New ATM sound effect</button>
   <button id="btnImport" type="button">Import songs.h</button>
@@ -227,7 +227,7 @@
     <h2>Selected step</h2>
     <p id="stepInfo" class="hint">No sound effect yet.</p>
     <h2>Export</h2>
-    <p class="hint">Command / hex export and songs.h import parsing come next. Imported text is shown below for now.</p>
+    <p class="hint">Same command list Play sends to ATMlib. Effects on a tick are written before the note, then ATM_DELAY for that note's length.</p>
     <pre id="info">—</pre>
     </div>
   </aside>
@@ -313,37 +313,73 @@ function playAtmBytes(bytes, ch) {
   atmMod._free(p);
   atmPhase = 0;
 }
-function buildTrack() {
-  const ev = Array.from({length: state.len}, () => []);
-  state.fxLines.forEach(line => {
-    line.cells.forEach((c, i) => {
-      if (!c || !line.effect) return;
-      if (line.effect === "vol") ev[i].push(0x40, c.v & 63);
-      else if (line.effect === "slvol") ev[i].push(0x41, c.d & 255);
-      else if (line.effect === "slvola") ev[i].push(0x42, c.a & 255, c.t & 63);
-      else if (line.effect === "slvoloff") ev[i].push(0x43);
-    });
-  });
-  for (let i = 0; i < state.len; i++) {
-    const s = state.steps[i];
-    if (s.note && s.hold > 0) ev[i].push(s.note & 63);
-  }
-  const out = [];
-  let t = 0;
-  while (t < state.len) {
-    out.push(...ev[t]);
-    let n = t + 1;
-    while (n < state.len && !ev[n].length) n++;
-    let left = n - t;
-    while (left > 0) {
-      const d = Math.min(64, left);
-      out.push(0x9F + d);
-      left -= d;
+function noteMacro(n) {
+  const nm = NOTE_NAMES[n] || ("N" + n);
+  return "ATM_NOTE_" + nm.replace("#", "_");
+}
+function fxMacro(effect, cell) {
+  if (effect === "vol") return "ATM_VOL(" + cell.v + ")";
+  if (effect === "slvol") return "ATM_SL_VOL(" + cell.d + ")";
+  if (effect === "slvola") return "ATM_SL_VOL_ADV(" + cell.a + ", " + cell.t + ")";
+  if (effect === "slvoloff") return "ATM_SL_VOL_OFF";
+  return effect;
+}
+function fxBytes(effect, cell) {
+  if (effect === "vol") return [0x40, cell.v & 63];
+  if (effect === "slvol") return [0x41, cell.d & 255];
+  if (effect === "slvola") return [0x42, cell.a & 255, cell.t & 63];
+  if (effect === "slvoloff") return [0x43];
+  return [];
+}
+function scoreProgram() {
+  const has = Array.from({length: state.len}, () => false);
+  const cmds = [];
+  const bytes = [];
+  function pushDelay(n) {
+    while (n > 0) {
+      const d = Math.min(64, n);
+      cmds.push("ATM_DELAY(" + d + ")");
+      bytes.push(0x9F + d);
+      n -= d;
     }
-    t = n;
   }
-  out.push(0x9F);
-  return out;
+  for (let i = 0; i < state.len; i++) {
+    if (state.steps[i].note && state.steps[i].hold > 0) has[i] = true;
+    state.fxLines.forEach(line => { if (line.effect && line.cells[i]) has[i] = true; });
+  }
+  let t = 0;
+  while (t < state.len && !has[t]) t++;
+  if (t > 0 && t < state.len) pushDelay(t);
+  while (t < state.len) {
+    state.fxLines.forEach(line => {
+      const c = line.cells[t];
+      if (!line.effect || !c) return;
+      cmds.push(fxMacro(line.effect, c));
+      bytes.push(...fxBytes(line.effect, c));
+    });
+    const step = state.steps[t];
+    const hold = step.note && step.hold > 0 ? step.hold : 0;
+    if (hold) {
+      cmds.push(noteMacro(step.note));
+      bytes.push(step.note & 63);
+    }
+    let n = t + 1;
+    while (n < state.len && !has[n]) n++;
+    const gap = n - t;
+    const span = hold ? Math.min(hold, gap) : (n < state.len ? gap : 0);
+    if (span) pushDelay(span);
+    const next = t + Math.max(span, 1);
+    if (next >= state.len || !has.slice(next).some(Boolean)) break;
+    t = next;
+  }
+  cmds.push("ATM_STOP_CHAN");
+  bytes.push(0x9F);
+  return { cmds, bytes };
+}
+function buildTrack() { return scoreProgram().bytes; }
+function previewText() {
+  const cmds = scoreProgram().cmds;
+  return ["const uint8_t soundFX00[] PROGMEM = {"].concat(cmds.map(c => "  " + c + ",")).concat(["};"]).join("\n");
 }
 function liveVoice(note, on, id) {
   if (!on) return;
@@ -464,18 +500,7 @@ function renderScore() {
     extra = cell ? " · " + fxText(state.selFx.effect, cell) : "";
   }
   document.getElementById("stepInfo").textContent = "Tick " + state.sel + " · " + name + (st.hold > 1 ? " · " + st.hold + " ticks" : "") + extra;
-  const lines = ["// sound effect preview"];
-  for (let i = 0; i < state.len; i++) {
-    const s = state.steps[i];
-    if (s.note && s.hold > 0) lines.push("tick " + i + "  " + (NOTE_NAMES[s.note] || s.note) + "  x" + s.hold);
-  }
-  state.fxLines.forEach((line, li) => {
-    line.cells.forEach((c, i) => {
-      if (c) lines.push("fx" + (li + 1) + " tick " + i + "  " + fxText(line.effect, c));
-    });
-  });
-  if (lines.length === 1) lines.push("(empty)");
-  if (!document.getElementById("info").dataset.import) document.getElementById("info").textContent = lines.join("\n");
+  if (!document.getElementById("info").dataset.import) document.getElementById("info").textContent = previewText();
 }
 function buildRow(kind, line, idx) {
   const row = document.createElement("div");
