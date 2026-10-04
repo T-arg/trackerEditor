@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ATMlib Track Editor</title>
+<title>ATMlib Track Editor v0.0.1</title>
 <link href="https://fonts.googleapis.com/css?family=Cookie&display=swap" rel="stylesheet" />
 <style>
   :root {
@@ -56,14 +56,13 @@
   .row { display: flex; align-items: center; gap: 6px; margin: 4px 0; flex-wrap: wrap; }
   .hint { color: var(--muted); font-size: 12px; }
   .start {
-    flex: 1; display: flex; align-items: center; justify-content: center; gap: 16px;
-    flex-wrap: wrap; padding: 24px;
+    display: flex; align-items: flex-start; justify-content: flex-start; gap: 12px;
+    flex-wrap: wrap; padding: 16px 16px 0;
   }
   .start button { padding: 14px 18px; font-size: 15px; border-radius: 6px; }
-  .score-scroll { flex: 1; overflow: auto; min-height: 0; padding: 12px; }
-  .score-zoom { transform-origin: 0 0; }
+  .score-scroll { flex: none; overflow-x: auto; overflow-y: hidden; min-height: 0; padding: 12px 12px 8px; }
   .score-head {
-    display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 12px 12px 8px;
   }
   .score-head .hint { margin-left: 4px; }
   .ruler, .tickrow { display: flex; align-items: flex-end; }
@@ -94,16 +93,16 @@
     flex: none; border-top: 3px solid #4a3b3a; background: #fefefd; padding: 8px 12px 12px;
   }
   .piano-wrap .row { margin-bottom: 6px; }
+  .piano-scroll { overflow-x: auto; overflow-y: hidden; border: 1px solid #4a3b3a; border-radius: 6px; background: #0a0c10; }
   .piano {
-    position: relative; height: 110px; user-select: none; border-radius: 6px;
-    overflow: hidden; border: 1px solid #4a3b3a; background: #0a0c10;
+    position: relative; height: 120px; user-select: none; background: #0a0c10;
   }
   .pwhite {
-    position: absolute; top: 0; bottom: 0; background: var(--keyw);
+    position: absolute; top: 0; bottom: 0; width: 36px; background: var(--keyw);
     border-right: 1px solid #bbb; cursor: pointer;
   }
   .pblack {
-    position: absolute; top: 0; height: 62%; background: var(--keyb);
+    position: absolute; top: 0; height: 62%; width: 22px; background: var(--keyb);
     border-radius: 0 0 4px 4px; cursor: pointer; z-index: 2;
   }
   .pwhite.on { background: #f4d35e; }
@@ -139,7 +138,7 @@
   <a class="site-logo" href="https://t-arg.github.io/" title="TEAM a.r.g." target="_blank" rel="noopener noreferrer">
     <img src="data:image/gif;base64,R0lGODlheQAuAMIFAEc8Okg8OUY9Nk5BPv7+/P///////////yH+EUNyZWF0ZWQgd2l0aCBHSU1QACH5BAEKAAcALAAAAAB5AC4AAAP+eHrRHivKSau9OOudA/kf4HBkaZ5PCnEe6DrDKc/z0LpfEG83DqrAxo5GNNk+tkduiOklB74oTheswipJq5CSvSqOBHDux7T0WjCptKeO6iTJ9uu9EJMP4Dz0XKacpw8DXYFyhXR4bIUEh4lLLWINi1N9En9hUIBrSFoqmItfTlaeizF5aZJhjR6Cd2Yve6o4rDqoiks5iCBxakJkjze0m7qeHr24ri9twTlopLY/uDd2ysGRtbdiT2OLwILeOw5Tco2oy4q0VMLPzrqJ6T/h13MPCsU4AIMpAFL428/Fj/b5+KYJWhSBLkQY9BGpGKJp8v75wyGgokUBY6w16jL+ioy6dRPn2LDBgBtDkAbNwUshyF6qgSpcsCoHciY5ew0Y7Hp1aV01W+EAMgQyZwzEcc3cjMzZ0I1JnyF5WXspa+rNeCifDpUEQchUeMy+AopHzg0adw3fwTxqi61XkgA7ivjmDaEsb2jsUvu4UslBrFnL4uyapSqQjn3RIA7rV2HWTWJBkptLZQFAYFrWYL3KUi1Kv48jQua2AJ+xVEDm8tv8zLRZ0DAD6I3KSzOVFfVEnA3CjTNYoJFjvlZV9qRZESIipOhNFHDR38DHwp5H3J3T4TmVB+XNbHYOux4AeL+eODIB3Y3Q34uFfYKSKiuZPTe6mLkD9ETlM8YeP1P+e/foISebPOHMtBBXux2Wj3A92cfJfvKZx41ufsDHxnYQMsbJdvnpt6EVw4imYQWylShgdeLFlOCDCN6X4gMvarHPgwMKJiCJ8A1loYYf2lfeh5dlJqJ9OHKnY3M8inLEckkK1xyQto1QSYp03YddGsg5qANdg1xioJaBrJiWV1S0NF1f7kUyI2bBWRgJlwseKROceM35zSp7tMSNmebRU0lYjOkpHSFbFhfaY+OBIB6fR1ZSTGG3pTgojIvECOSlmLJ4Hj47LUGSZUFyqF+TsPAYJTVnUscgczsJYYef9Ty1HIMs1XlbGUFol6ujuxaJGwOmYQaJH6TAkA6DVQbN1YWuQIBaBbPNkvjErwzcBl1X9JiyCjN4GXpMmlbUE8ggzm65LIkvVBAsQ8Cet4K2jkDXxqe8unpuCqBIGUgd3iDzLQUC5BMDTnUIhAk+JT1aBXgVSlltdviKSwesGwwgEMIo/BABJOBo7O8n4Gb38AoRVzsErCpY8EQNXtTRchaUuLxEw0Hs0G3JeJgp8ZZF9HzCyjRHqx259VLs89E915rFyNUiMgI9uRqN9NQsoMxUNO8+jXXKaFDtNQl08VvKFoKI7XQpcJ79tQQJAAA7" alt="TEAM a.r.g.">
   </a>
-  <h1>ATMlib Track Editor</h1>
+  <h1>ATMlib Track Editor <span style="color:#6b5f5e;font-weight:500">v0.0.1</span></h1>
   <button id="btnNewSong" type="button">New song</button>
   <button id="btnNewSfx" type="button">New soundfx</button>
   <button id="btnImport" type="button">Import songs.h</button>
@@ -150,13 +149,6 @@
 </header>
 <div class="layout">
   <aside class="panel" id="left">
-    <h2>View</h2>
-    <div class="row">
-      <label for="zoom">Zoom</label>
-      <input id="zoom" type="range" min="25" max="400" value="100">
-      <span id="zoomVal">100%</span>
-    </div>
-    <p class="hint">Zooms the score in the main window. The piano stays at a fixed size so the keys remain playable.</p>
     <h2>Later</h2>
     <p class="hint">Pattern list, channel tools and other song functions will live here.</p>
   </aside>
@@ -172,26 +164,24 @@
       </div>
     </div>
     <div id="sfxPane" hidden style="display:flex;flex-direction:column;min-height:0;flex:1;">
+      <div class="score-head">
+        <strong id="sfxTitle">Sound effect</strong>
+        <label>Ticks <input id="sfxLen" type="number" min="4" max="256" value="32" style="width:64px"></label>
+        <button id="btnRec" type="button" class="active">Record</button>
+        <button id="btnEdit" type="button">Edit</button>
+        <button id="btnPlay" type="button">Play</button>
+        <button id="btnStop" type="button">Stop</button>
+        <span class="hint">Click a cell, then play a key. Hold in Record to lengthen.</span>
+      </div>
       <div class="score-scroll" id="scoreScroll">
-        <div id="scoreZoom" class="score-zoom">
-          <div class="score-head">
-            <strong id="sfxTitle">Sound effect</strong>
-            <label>Ticks <input id="sfxLen" type="number" min="4" max="256" value="32" style="width:64px"></label>
-            <button id="btnRec" type="button" class="active">Record</button>
-            <button id="btnEdit" type="button">Edit</button>
-            <button id="btnPlay" type="button">Play</button>
-            <button id="btnStop" type="button">Stop</button>
-            <span class="hint">Click a cell, then play a key. Hold in Record to lengthen.</span>
-          </div>
-          <div class="ruler" id="ruler"></div>
-          <div class="lane" id="lane"></div>
-        </div>
+        <div class="ruler" id="ruler"></div>
+        <div class="lane" id="lane"></div>
       </div>
       <div class="piano-wrap">
         <div class="row">
           <span class="hint" id="octLabel">Octave 3 · computer keys A–L · ↑↓ octave · ←→ step · Del clear</span>
         </div>
-        <div class="piano" id="piano"></div>
+        <div class="piano-scroll"><div class="piano" id="piano"></div></div>
       </div>
     </div>
   </main>
@@ -317,15 +307,16 @@ function noteOff(atm, id) {
 }
 
 const pianoEl = document.getElementById("piano");
+const KEY_W = 36;
 (function buildPiano() {
   const first = 36, last = 98, whites = [];
   for (let m = first; m <= last; m++) if (![1,3,6,8,10].includes(m % 12)) whites.push(m);
-  const w = 100 / whites.length;
+  pianoEl.style.width = (whites.length * KEY_W) + "px";
   whites.forEach((m, i) => {
     const el = document.createElement("div");
     el.className = "pwhite";
-    el.style.left = (i * w) + "%";
-    el.style.width = w + "%";
+    el.style.left = (i * KEY_W) + "px";
+    el.style.width = KEY_W + "px";
     el.dataset.midi = m;
     const lab = document.createElement("div");
     lab.className = "plab";
@@ -339,8 +330,8 @@ const pianoEl = document.getElementById("piano");
     const idx = whites.findIndex(x => x > m) - 1;
     const el = document.createElement("div");
     el.className = "pblack";
-    el.style.left = ((Math.max(0, idx) + 0.68) * w) + "%";
-    el.style.width = (w * 0.62) + "%";
+    el.style.left = ((Math.max(0, idx) + 0.64) * KEY_W) + "px";
+    el.style.width = Math.round(KEY_W * 0.62) + "px";
     el.dataset.midi = m;
     bindKey(el, m);
     pianoEl.appendChild(el);
@@ -409,7 +400,7 @@ function bindNoteDrag(note, edge, head) {
     const dur = state.steps[head].hold;
     const atm = state.steps[head].note;
     function move(ev) {
-      const dx = Math.round((ev.clientX - origin) / (28 * zoomFactor()));
+      const dx = Math.round((ev.clientX - origin) / 28);
       const dest = Math.max(0, Math.min(state.len - dur, start + dx));
       if (dest === head) return;
       paintMove(start, dest, dur, atm);
@@ -428,7 +419,7 @@ function bindNoteDrag(note, edge, head) {
     const origin = e.clientX;
     const startDur = state.steps[head].hold;
     function move(ev) {
-      const dx = Math.round((ev.clientX - origin) / (28 * zoomFactor()));
+      const dx = Math.round((ev.clientX - origin) / 28);
       applyHold(head, startDur + dx);
       renderScore();
     }
@@ -454,10 +445,6 @@ function paintMove(from, to, dur, atm) {
   state.sel = to;
   state.dirty = true;
 }
-function zoomFactor() {
-  return (+document.getElementById("zoom").value) / 100;
-}
-
 function showHome() {
   state.mode = "home";
   document.getElementById("start").hidden = false;
@@ -508,11 +495,6 @@ document.getElementById("fileSongs").onchange = async e => {
   const pre = document.getElementById("info");
   pre.dataset.import = "1";
   pre.textContent = "Imported " + f.name + " (" + text.length + " chars). Parsing comes later.\n\n" + text.slice(0, 4000);
-};
-document.getElementById("zoom").oninput = e => {
-  const z = e.target.value;
-  document.getElementById("zoomVal").textContent = z + "%";
-  document.getElementById("scoreZoom").style.transform = "scale(" + (z / 100) + ")";
 };
 document.getElementById("sfxLen").onchange = e => {
   const n = Math.max(4, Math.min(256, +e.target.value || 32));
