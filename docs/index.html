@@ -1,97 +1,608 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>atm track editor</title>
-        <link rel="icon" type="image/png" href="/icon.png">
-        <link rel="stylesheet" href="css/style.css" />
-        <link rel="stylesheet" href="css/font-awesome.min.css" />
-    </head>
-    <body>
-        <div class="shadow">
-            <div class="white-background">
-
-                <header>
-                    <div class="title">
-                        <img src="images/title.gif" height="64" width="700">
-                    </div>
-                    <div class="header-buttons">
-                        <a href="http://www.team-arg.org/index.html">
-                            <img src="images/home.gif" height="28" width="88">
-                        </a>
-                        <a href="http://www.team-arg.org/news.html">
-                            <img src="images/news.gif" height="28" width="88">
-                        </a>
-                        <a href="http://www.team-arg.org/games.html">
-                            <img src="images/games.gif" height="28" width="108">
-                        </a>
-                        <a href="http://www.team-arg.org/demos.html">
-                            <img src="images/demos.gif" height="28" width="108">
-                        </a>
-                        <a href="http://www.team-arg.org/tools.html">
-                            <img src="images/tools.gif" height="28" width="108">
-                        </a>
-                        <a href="http://www.team-arg.org/more-about.html">
-                            <img src="images/more.gif" height="28" width="88">
-                        </a>
-                    </div>
-                    <div class="banner">
-                        <img src="images/ATMtrackereditor.png"/>
-                        <div class="banner-buttons">
-                            <a href="/trackerEditor/">
-                                <img src="images/tool.gif"/>
-                            </a>
-                            <img src="images/line.gif"/>
-                            <a href="http://www.team-arg.org/atmedit-manual.html">
-                                <img src="images/manual.gif"/>
-                            </a>
-                        </div>
-                    </div>
-                    <img class="line" src="images/longLine.gif" height="5" width="700">
-                </header>
-
-                <div id="app"></div>
-
-                <footer>
-                    <div>
-
-                        <div class="line">
-                            <img src="images/longLine.gif" height="5" width="700">
-                        </div>
-
-                        <div class="spread">
-
-                            <div class="link-images">
-                                <a href="http://www.twitter.com/TEAMarg_org">
-                                    <img src="images/twitter.gif" height="48" width="48">
-                                </a>
-                                <a href="https://www.youtube.com/channel/UC5PtrkZ9BaCrLIW8WXe2_XA">
-                                    <img src="images/youtube.gif" height="48" width="48">
-                                </a>
-                                <a href="https://github.com/TEAMarg">
-                                    <img src="images/github.gif" height="48" width="48">
-                                </a>
-                                <a href="https://www.facebook.com/TEAMArduinoRetroGaming/">
-                                    <img src="images/facebook.gif" height="48" width="48">
-                                </a>
-                            </div>
-
-                            <div>
-                                <img src="images/8bit-games.gif" height="48" width="96">
-                            </div>
-
-                        </div>
-
-                    </div>
-                </footer>
-
-            </div>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ATMlib Track Editor</title>
+<link href="https://fonts.googleapis.com/css?family=Cookie&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #fefefd; --panel: #f5f5f3; --ink: #333; --muted: #6b5f5e;
+    --accent: #4a3b3a; --warn: #c0392b;
+    --keyw: #f7f4ef; --keyb: #1a1616;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font: 13px/1.45 "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg); color: var(--ink);
+    display: flex; flex-direction: column; min-height: 100vh;
+  }
+  header {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 8px 16px; background: #fefefd; border-bottom: 3px solid #4a3b3a;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  .site-logo { display: flex; align-items: center; flex-shrink: 0; }
+  .site-logo img { height: 48px; width: auto; display: block; }
+  header h1 { font-size: 16px; margin: 0; color: #4a3b3a; letter-spacing: .04em; }
+  .bmc-slot { margin-left: auto; display: flex; align-items: center; }
+  button, select, input[type=number], input[type=text] {
+    background: #4a3b3a; color: #fefefd; border: 1px solid #4a3b3a;
+    padding: 4px 8px; border-radius: 3px; font: inherit;
+  }
+  button:hover { background: #2e2424; cursor: pointer; }
+  button.active { background: #2e2424; box-shadow: inset 0 0 0 1px #fefefd; }
+  input[type=number], input[type=text] { background: #fff; color: #333; }
+  input[type=range] { width: 170px; accent-color: #4a3b3a; }
+  .layout {
+    display: grid; grid-template-columns: 280px minmax(0, 1fr) 320px;
+    height: calc(100vh - 68px); min-height: 0;
+  }
+  .panel {
+    padding: 12px; overflow: auto; background: var(--panel);
+    border-right: 1px solid #ddd; min-height: 0;
+  }
+  .panel.right { border-right: 0; border-left: 1px solid #ddd; background: #f7f6f4; }
+  .panel.main {
+    background: var(--bg); display: flex; flex-direction: column;
+    padding: 0; overflow: hidden;
+  }
+  .panel h2 {
+    font-size: 13px; margin: 14px 0 8px; color: var(--accent);
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .panel h2:first-child { margin-top: 0; }
+  .row { display: flex; align-items: center; gap: 6px; margin: 4px 0; flex-wrap: wrap; }
+  .hint { color: var(--muted); font-size: 12px; }
+  .start {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 16px;
+    flex-wrap: wrap; padding: 24px;
+  }
+  .start button { padding: 14px 18px; font-size: 15px; border-radius: 6px; }
+  .score-scroll { flex: 1; overflow: auto; min-height: 0; padding: 12px; }
+  .score-zoom { transform-origin: 0 0; }
+  .score-head {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;
+  }
+  .score-head .hint { margin-left: 4px; }
+  .ruler, .tickrow { display: flex; align-items: flex-end; }
+  .ruler { height: 18px; margin-left: 0; color: var(--muted); font: 10px ui-monospace, monospace; }
+  .tickmark { width: 28px; flex: none; text-align: center; }
+  .lane {
+    display: flex; min-height: 72px; background: #fff; border: 1px solid #4a3b3a;
+    border-radius: 6px; position: relative;
+  }
+  .cell {
+    width: 28px; flex: none; height: 72px; border-right: 1px solid #e4e0dc;
+    position: relative; cursor: pointer;
+  }
+  .cell:nth-child(4n) { border-right-color: #cfc8c2; }
+  .cell.sel { background: #f4d35e55; }
+  .cell.beat { background: #f5f5f3; }
+  .cell.sel.beat { background: #f4d35e88; }
+  .note {
+    position: absolute; top: 16px; height: 40px; border-radius: 4px;
+    background: #4a3b3a; color: #fefefd; font: 700 11px/40px ui-monospace, monospace;
+    text-align: center; overflow: hidden; cursor: grab; z-index: 2; user-select: none;
+  }
+  .note .edge {
+    position: absolute; right: 0; top: 0; bottom: 0; width: 8px; cursor: ew-resize;
+    background: #f4d35e;
+  }
+  .piano-wrap {
+    flex: none; border-top: 3px solid #4a3b3a; background: #fefefd; padding: 8px 12px 12px;
+  }
+  .piano-wrap .row { margin-bottom: 6px; }
+  .piano {
+    position: relative; height: 110px; user-select: none; border-radius: 6px;
+    overflow: hidden; border: 1px solid #4a3b3a; background: #0a0c10;
+  }
+  .pwhite {
+    position: absolute; top: 0; bottom: 0; background: var(--keyw);
+    border-right: 1px solid #bbb; cursor: pointer;
+  }
+  .pblack {
+    position: absolute; top: 0; height: 62%; background: var(--keyb);
+    border-radius: 0 0 4px 4px; cursor: pointer; z-index: 2;
+  }
+  .pwhite.on { background: #f4d35e; }
+  .pblack.on { background: #c0392b; }
+  .plab {
+    position: absolute; bottom: 4px; left: 0; right: 0; text-align: center;
+    font-size: 9px; color: #555; pointer-events: none;
+  }
+  .bmc-btn {
+    min-width: 210px; color: #fefefd !important; background: #5d4c4b !important;
+    height: 60px; border-radius: 12px; font-size: 28px; font-weight: normal;
+    border: none; padding: 0 24px; line-height: 27px; text-decoration: none !important;
+    display: inline-flex !important; align-items: center;
+    font-family: "Cookie", cursive !important;
+  }
+  .bmc-btn-text { margin-left: 8px; white-space: nowrap; line-height: 1; }
+  kbd {
+    font: 11px ui-monospace, monospace; border: 1px solid #4a3b3a;
+    border-bottom-width: 2px; border-radius: 3px; padding: 0 4px; background: #fff;
+  }
+  #info pre {
+    white-space: pre-wrap; background: #fff; border: 1px solid #4a3b3a;
+    padding: 8px; font: 11px/1.4 ui-monospace, monospace; min-height: 80px;
+  }
+  .placeholder {
+    border: 1px dashed #4a3b3a; border-radius: 8px; padding: 28px; text-align: center;
+    color: var(--muted); background: #fff;
+  }
+</style>
+</head>
+<body>
+<header>
+  <a class="site-logo" href="https://t-arg.github.io/" title="TEAM a.r.g." target="_blank" rel="noopener noreferrer">
+    <img src="data:image/gif;base64,R0lGODlheQAuAMIFAEc8Okg8OUY9Nk5BPv7+/P///////////yH+EUNyZWF0ZWQgd2l0aCBHSU1QACH5BAEKAAcALAAAAAB5AC4AAAP+eHrRHivKSau9OOudA/kf4HBkaZ5PCnEe6DrDKc/z0LpfEG83DqrAxo5GNNk+tkduiOklB74oTheswipJq5CSvSqOBHDux7T0WjCptKeO6iTJ9uu9EJMP4Dz0XKacpw8DXYFyhXR4bIUEh4lLLWINi1N9En9hUIBrSFoqmItfTlaeizF5aZJhjR6Cd2Yve6o4rDqoiks5iCBxakJkjze0m7qeHr24ri9twTlopLY/uDd2ysGRtbdiT2OLwILeOw5Tco2oy4q0VMLPzrqJ6T/h13MPCsU4AIMpAFL428/Fj/b5+KYJWhSBLkQY9BGpGKJp8v75wyGgokUBY6w16jL+ioy6dRPn2LDBgBtDkAbNwUshyF6qgSpcsCoHciY5ew0Y7Hp1aV01W+EAMgQyZwzEcc3cjMzZ0I1JnyF5WXspa+rNeCifDpUEQchUeMy+AopHzg0adw3fwTxqi61XkgA7ivjmDaEsb2jsUvu4UslBrFnL4uyapSqQjn3RIA7rV2HWTWJBkptLZQFAYFrWYL3KUi1Kv48jQua2AJ+xVEDm8tv8zLRZ0DAD6I3KSzOVFfVEnA3CjTNYoJFjvlZV9qRZESIipOhNFHDR38DHwp5H3J3T4TmVB+XNbHYOux4AeL+eODIB3Y3Q34uFfYKSKiuZPTe6mLkD9ETlM8YeP1P+e/foISebPOHMtBBXux2Wj3A92cfJfvKZx41ufsDHxnYQMsbJdvnpt6EVw4imYQWylShgdeLFlOCDCN6X4gMvarHPgwMKJiCJ8A1loYYf2lfeh5dlJqJ9OHKnY3M8inLEckkK1xyQto1QSYp03YddGsg5qANdg1xioJaBrJiWV1S0NF1f7kUyI2bBWRgJlwseKROceM35zSp7tMSNmebRU0lYjOkpHSFbFhfaY+OBIB6fR1ZSTGG3pTgojIvECOSlmLJ4Hj47LUGSZUFyqF+TsPAYJTVnUscgczsJYYef9Ty1HIMs1XlbGUFol6ujuxaJGwOmYQaJH6TAkA6DVQbN1YWuQIBaBbPNkvjErwzcBl1X9JiyCjN4GXpMmlbUE8ggzm65LIkvVBAsQ8Cet4K2jkDXxqe8unpuCqBIGUgd3iDzLQUC5BMDTnUIhAk+JT1aBXgVSlltdviKSwesGwwgEMIo/BABJOBo7O8n4Gb38AoRVzsErCpY8EQNXtTRchaUuLxEw0Hs0G3JeJgp8ZZF9HzCyjRHqx259VLs89E915rFyNUiMgI9uRqN9NQsoMxUNO8+jXXKaFDtNQl08VvKFoKI7XQpcJ79tQQJAAA7" alt="TEAM a.r.g.">
+  </a>
+  <h1>ATMlib Track Editor</h1>
+  <button id="btnNewSong" type="button">New song</button>
+  <button id="btnNewSfx" type="button">New soundfx</button>
+  <button id="btnImport" type="button">Import songs.h</button>
+  <input id="fileSongs" type="file" accept=".h,.c,.txt" hidden>
+  <div class="bmc-slot">
+    <a class="bmc-btn" target="_blank" rel="noopener noreferrer" href="https://buymeacoffee.com/TEAMarg">☕<span class="bmc-btn-text">Cool tool? Buy us a coffee</span></a>
+  </div>
+</header>
+<div class="layout">
+  <aside class="panel" id="left">
+    <h2>View</h2>
+    <div class="row">
+      <label for="zoom">Zoom</label>
+      <input id="zoom" type="range" min="25" max="400" value="100">
+      <span id="zoomVal">100%</span>
+    </div>
+    <p class="hint">Zooms the score in the main window. The piano stays at a fixed size so the keys remain playable.</p>
+    <h2>Later</h2>
+    <p class="hint">Pattern list, channel tools and other song functions will live here.</p>
+  </aside>
+  <main class="panel main" id="main">
+    <div class="start" id="start">
+      <button id="btnStartSong" type="button">New ATM song</button>
+      <button id="btnStartSfx" type="button">New ATM sound effect</button>
+    </div>
+    <div id="songPane" class="score-scroll" hidden>
+      <div class="placeholder">
+        <h2>ATM song</h2>
+        <p>Song arrangement is next. The sound-effect score is the part that is live.</p>
+      </div>
+    </div>
+    <div id="sfxPane" hidden style="display:flex;flex-direction:column;min-height:0;flex:1;">
+      <div class="score-scroll" id="scoreScroll">
+        <div id="scoreZoom" class="score-zoom">
+          <div class="score-head">
+            <strong id="sfxTitle">Sound effect</strong>
+            <label>Ticks <input id="sfxLen" type="number" min="4" max="256" value="32" style="width:64px"></label>
+            <button id="btnRec" type="button" class="active">Record</button>
+            <button id="btnEdit" type="button">Edit</button>
+            <button id="btnPlay" type="button">Play</button>
+            <button id="btnStop" type="button">Stop</button>
+            <span class="hint">Click a cell, then play a key. Hold in Record to lengthen.</span>
+          </div>
+          <div class="ruler" id="ruler"></div>
+          <div class="lane" id="lane"></div>
         </div>
+      </div>
+      <div class="piano-wrap">
+        <div class="row">
+          <span class="hint" id="octLabel">Octave 3 · computer keys A–L · ↑↓ octave · ←→ step · Del clear</span>
+        </div>
+        <div class="piano" id="piano"></div>
+      </div>
+    </div>
+  </main>
+  <aside class="panel right" id="right">
+    <h2>Sound effect</h2>
+    <p class="hint">One voice, one horizontal score. Notes are ATMlib note numbers (C2 = 1), same mapping as the v0.1.7 tracker.</p>
+    <p class="hint"><kbd>Space</kbd> play / stop · <kbd>A</kbd><kbd>W</kbd><kbd>S</kbd><kbd>E</kbd><kbd>D</kbd>… piano · drag a note to move it · drag the yellow edge to change length.</p>
+    <h2>Selected step</h2>
+    <p id="stepInfo" class="hint">No sound effect yet.</p>
+    <h2>Export</h2>
+    <p class="hint">Command / hex export and songs.h import parsing come next. Imported text is shown below for now.</p>
+    <pre id="info">—</pre>
+  </aside>
+</div>
+<script>
+const NOTE_NAMES = (() => {
+  const n = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+  const out = [""];
+  for (let i = 1; i <= 63; i++) {
+    const midi = 36 + (i - 1);
+    out.push(n[midi % 12] + Math.floor(midi / 12 - 1));
+  }
+  return out;
+})();
+function atmToFreq(note) {
+  if (!note) return 0;
+  return 440 * Math.pow(2, ((36 + note - 1) - 69) / 12);
+}
+function blankSteps(n) {
+  return Array.from({length: n}, () => ({note: 0, hold: 0}));
+}
+const state = {
+  mode: "home",
+  steps: blankSteps(32),
+  len: 32,
+  sel: 0,
+  recording: true,
+  playing: false,
+  held: new Map(),
+  dirty: false
+};
+let baseOct = 3;
+let actx = null;
+const voices = {};
+function ensureAudio() {
+  if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+  return actx;
+}
+function liveVoice(atm, on, id) {
+  ensureAudio();
+  if (on) {
+    if (voices[id]) return;
+    const o = actx.createOscillator();
+    const g = actx.createGain();
+    o.type = "square";
+    o.frequency.value = atmToFreq(atm);
+    g.gain.value = 0.08;
+    o.connect(g); g.connect(actx.destination); o.start();
+    voices[id] = {node: o, g};
+  } else if (voices[id]) {
+    try { voices[id].g.gain.setTargetAtTime(0.0001, actx.currentTime, 0.03); voices[id].node.stop(actx.currentTime + 0.08); } catch (e) {}
+    delete voices[id];
+  }
+}
 
-        <script src="js/squawksynth.js"></script>
-        <script src="js/webaudio.js"></script>
-        <script src="js/converter.js"></script>
-        <script src="js/squawkstream.js"></script>
+function placeNote(atm, i) {
+  if (i < 0 || i >= state.len) return;
+  clearRange(i, false);
+  state.steps[i].note = atm;
+  state.steps[i].hold = 1;
+  state.sel = i;
+  state.dirty = true;
+  if (state.recording) state.sel = Math.min(state.len - 1, i + 1);
+  renderScore();
+}
+function applyHold(start, dur) {
+  const old = Math.max(1, state.steps[start].hold || 1);
+  dur = Math.max(1, Math.min(dur, state.len - start));
+  for (let t = 1; t < old; t++) {
+    const i = start + t;
+    if (i >= state.len) break;
+    if (state.steps[i].hold < 0) state.steps[i].hold = 0;
+  }
+  state.steps[start].hold = dur;
+  for (let t = 1; t < dur; t++) {
+    const i = start + t;
+    if (i >= state.len) { state.steps[start].hold = t; break; }
+    if (state.steps[i].note) { state.steps[start].hold = t; break; }
+    state.steps[i].note = 0;
+    state.steps[i].hold = -1;
+  }
+}
+function clearRange(i, redraw) {
+  let s = i;
+  while (s > 0 && state.steps[s].hold < 0) s--;
+  const dur = Math.max(1, state.steps[s].hold || 1);
+  for (let t = 0; t < dur && s + t < state.steps.length; t++) {
+    state.steps[s + t].note = 0;
+    state.steps[s + t].hold = 0;
+  }
+  if (redraw) { state.dirty = true; renderScore(); }
+}
+function noteOn(atm, id) {
+  if (state.held.has(id)) return;
+  paintPiano(atm, true);
+  liveVoice(atm, true, id);
+  if (state.mode !== "sfx") { state.held.set(id, {atm, start: -1}); return; }
+  const at = state.sel;
+  placeNote(atm, at);
+  if (state.recording) state.held.set(id, {atm, start: at, ticks: 1});
+  else state.held.set(id, {atm, start: -1});
+}
+function noteOff(atm, id) {
+  paintPiano(atm, false);
+  liveVoice(atm, false, id);
+  const h = state.held.get(id);
+  if (h && state.recording && h.start >= 0) {
+    applyHold(h.start, Math.max(1, h.ticks || 1));
+    state.sel = Math.min(state.len - 1, h.start + (h.ticks || 1));
+    renderScore();
+  }
+  state.held.delete(id);
+}
 
-        <script type="text/javascript" src="js/app.js"></script>
-    </body>
+const pianoEl = document.getElementById("piano");
+(function buildPiano() {
+  const first = 36, last = 98, whites = [];
+  for (let m = first; m <= last; m++) if (![1,3,6,8,10].includes(m % 12)) whites.push(m);
+  const w = 100 / whites.length;
+  whites.forEach((m, i) => {
+    const el = document.createElement("div");
+    el.className = "pwhite";
+    el.style.left = (i * w) + "%";
+    el.style.width = w + "%";
+    el.dataset.midi = m;
+    const lab = document.createElement("div");
+    lab.className = "plab";
+    lab.textContent = (m % 12 === 0) ? NOTE_NAMES[m - 35] : "";
+    el.appendChild(lab);
+    bindKey(el, m);
+    pianoEl.appendChild(el);
+  });
+  for (let m = first; m <= last; m++) {
+    if (![1,3,6,8,10].includes(m % 12)) continue;
+    const idx = whites.findIndex(x => x > m) - 1;
+    const el = document.createElement("div");
+    el.className = "pblack";
+    el.style.left = ((Math.max(0, idx) + 0.68) * w) + "%";
+    el.style.width = (w * 0.62) + "%";
+    el.dataset.midi = m;
+    bindKey(el, m);
+    pianoEl.appendChild(el);
+  }
+})();
+function bindKey(el, midi) {
+  el.onmousedown = e => { e.preventDefault(); noteOn(midi - 35, "ui" + midi); };
+  el.onmouseup = () => noteOff(midi - 35, "ui" + midi);
+  el.onmouseleave = () => noteOff(midi - 35, "ui" + midi);
+}
+function paintPiano(atm, on) {
+  pianoEl.querySelectorAll("[data-midi]").forEach(el => {
+    if (+el.dataset.midi === atm + 35) el.classList.toggle("on", on);
+  });
+}
+
+function renderScore() {
+  const ruler = document.getElementById("ruler");
+  const lane = document.getElementById("lane");
+  ruler.innerHTML = "";
+  lane.innerHTML = "";
+  lane.style.width = (state.len * 28) + "px";
+  ruler.style.width = (state.len * 28) + "px";
+  for (let i = 0; i < state.len; i++) {
+    const mk = document.createElement("div");
+    mk.className = "tickmark";
+    mk.textContent = (i % 4 === 0) ? i : "";
+    ruler.appendChild(mk);
+    const cell = document.createElement("div");
+    cell.className = "cell" + (i === state.sel ? " sel" : "") + (i % 4 === 0 ? " beat" : "");
+    cell.dataset.i = i;
+    cell.onclick = () => { state.sel = i; renderScore(); };
+    lane.appendChild(cell);
+  }
+  for (let i = 0; i < state.len; i++) {
+    const st = state.steps[i];
+    if (!st.note || st.hold < 1) continue;
+    const note = document.createElement("div");
+    note.className = "note";
+    note.style.left = (i * 28 + 1) + "px";
+    note.style.width = (st.hold * 28 - 4) + "px";
+    note.textContent = NOTE_NAMES[st.note] || st.note;
+    const edge = document.createElement("div");
+    edge.className = "edge";
+    note.appendChild(edge);
+    bindNoteDrag(note, edge, i);
+    lane.appendChild(note);
+  }
+  const st = state.steps[state.sel] || {note: 0, hold: 0};
+  const name = st.note ? (NOTE_NAMES[st.note] + "  ATM " + st.note) : (st.hold < 0 ? "hold" : "empty");
+  document.getElementById("stepInfo").textContent = "Tick " + state.sel + " · " + name + (st.hold > 1 ? " · " + st.hold + " ticks" : "");
+  const lines = ["// sound effect preview"];
+  for (let i = 0; i < state.len; i++) {
+    const s = state.steps[i];
+    if (s.note && s.hold > 0) lines.push("tick " + i + "  " + (NOTE_NAMES[s.note] || s.note) + "  x" + s.hold);
+  }
+  if (lines.length === 1) lines.push("(empty)");
+  if (!document.getElementById("info").dataset.import) document.getElementById("info").textContent = lines.join("\n");
+}
+function bindNoteDrag(note, edge, head) {
+  note.onmousedown = e => {
+    if (e.target === edge) return;
+    e.preventDefault();
+    const origin = e.clientX;
+    const start = head;
+    const dur = state.steps[head].hold;
+    const atm = state.steps[head].note;
+    function move(ev) {
+      const dx = Math.round((ev.clientX - origin) / (28 * zoomFactor()));
+      const dest = Math.max(0, Math.min(state.len - dur, start + dx));
+      if (dest === head) return;
+      paintMove(start, dest, dur, atm);
+    }
+    function up() {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+      renderScore();
+    }
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+  };
+  edge.onmousedown = e => {
+    e.preventDefault();
+    e.stopPropagation();
+    const origin = e.clientX;
+    const startDur = state.steps[head].hold;
+    function move(ev) {
+      const dx = Math.round((ev.clientX - origin) / (28 * zoomFactor()));
+      applyHold(head, startDur + dx);
+      renderScore();
+    }
+    function up() {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+    }
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+  };
+}
+function paintMove(from, to, dur, atm) {
+  for (let t = 0; t < dur; t++) {
+    state.steps[from + t].note = 0;
+    state.steps[from + t].hold = 0;
+  }
+  state.steps[to].note = atm;
+  state.steps[to].hold = dur;
+  for (let t = 1; t < dur; t++) {
+    state.steps[to + t].note = 0;
+    state.steps[to + t].hold = -1;
+  }
+  state.sel = to;
+  state.dirty = true;
+}
+function zoomFactor() {
+  return (+document.getElementById("zoom").value) / 100;
+}
+
+function showHome() {
+  state.mode = "home";
+  document.getElementById("start").hidden = false;
+  document.getElementById("songPane").hidden = true;
+  document.getElementById("sfxPane").hidden = true;
+  document.getElementById("stepInfo").textContent = "No sound effect yet.";
+}
+function confirmReset() {
+  if (!state.dirty) return true;
+  return confirm("Start over? The current score will be cleared.");
+}
+function newSong() {
+  if (!confirmReset()) return;
+  state.dirty = false;
+  state.mode = "song";
+  document.getElementById("start").hidden = true;
+  document.getElementById("sfxPane").hidden = true;
+  document.getElementById("songPane").hidden = false;
+  document.getElementById("stepInfo").textContent = "Song editor is not built yet.";
+}
+function newSfx() {
+  if (state.mode === "sfx" && !confirmReset()) return;
+  if (state.mode !== "sfx" && state.dirty && !confirmReset()) return;
+  state.steps = blankSteps(32);
+  state.len = 32;
+  state.sel = 0;
+  state.recording = true;
+  state.dirty = false;
+  state.mode = "sfx";
+  document.getElementById("sfxLen").value = 32;
+  document.getElementById("start").hidden = true;
+  document.getElementById("songPane").hidden = true;
+  document.getElementById("sfxPane").hidden = false;
+  document.getElementById("btnRec").classList.add("active");
+  document.getElementById("btnEdit").classList.remove("active");
+  document.getElementById("info").dataset.import = "";
+  renderScore();
+}
+document.getElementById("btnNewSong").onclick = newSong;
+document.getElementById("btnStartSong").onclick = newSong;
+document.getElementById("btnNewSfx").onclick = newSfx;
+document.getElementById("btnStartSfx").onclick = newSfx;
+document.getElementById("btnImport").onclick = () => document.getElementById("fileSongs").click();
+document.getElementById("fileSongs").onchange = async e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const text = await f.text();
+  const pre = document.getElementById("info");
+  pre.dataset.import = "1";
+  pre.textContent = "Imported " + f.name + " (" + text.length + " chars). Parsing comes later.\n\n" + text.slice(0, 4000);
+};
+document.getElementById("zoom").oninput = e => {
+  const z = e.target.value;
+  document.getElementById("zoomVal").textContent = z + "%";
+  document.getElementById("scoreZoom").style.transform = "scale(" + (z / 100) + ")";
+};
+document.getElementById("sfxLen").onchange = e => {
+  const n = Math.max(4, Math.min(256, +e.target.value || 32));
+  e.target.value = n;
+  if (n > state.steps.length) state.steps.push(...blankSteps(n - state.steps.length));
+  state.len = n;
+  state.sel = Math.min(state.sel, n - 1);
+  state.dirty = true;
+  renderScore();
+};
+document.getElementById("btnRec").onclick = () => {
+  state.recording = true;
+  document.getElementById("btnRec").classList.add("active");
+  document.getElementById("btnEdit").classList.remove("active");
+};
+document.getElementById("btnEdit").onclick = () => {
+  state.recording = false;
+  document.getElementById("btnEdit").classList.add("active");
+  document.getElementById("btnRec").classList.remove("active");
+};
+
+let timer = null;
+function togglePlay() { state.playing ? stopPlay() : startPlay(); }
+function startPlay() {
+  if (state.mode !== "sfx") return;
+  ensureAudio();
+  state.playing = true;
+  document.getElementById("btnPlay").classList.add("active");
+  let i = 0;
+  const step = () => {
+    if (!state.playing) return;
+    state.sel = i;
+    const s = state.steps[i];
+    if (s && s.note && s.hold > 0) {
+      liveVoice(0, false, "play");
+      liveVoice(s.note, true, "play");
+      paintPiano(s.note, true);
+    }
+    renderScore();
+    i++;
+    if (i >= state.len) { stopPlay(); return; }
+    timer = setTimeout(step, 140);
+  };
+  step();
+}
+function stopPlay() {
+  state.playing = false;
+  document.getElementById("btnPlay").classList.remove("active");
+  if (timer) clearTimeout(timer);
+  liveVoice(0, false, "play");
+  pianoEl.querySelectorAll(".on").forEach(el => el.classList.remove("on"));
+}
+document.getElementById("btnPlay").onclick = startPlay;
+document.getElementById("btnStop").onclick = stopPlay;
+
+const KEY_PC = {KeyA:0,KeyW:1,KeyS:2,KeyE:3,KeyD:4,KeyF:5,KeyT:6,KeyG:7,KeyY:8,KeyH:9,KeyU:10,KeyJ:11,KeyK:12,KeyO:13,KeyL:14,KeyP:15,Semicolon:16};
+const down = new Set();
+window.addEventListener("keydown", e => {
+  if (e.target.matches("input,textarea,select")) return;
+  if (e.code === "Space") { e.preventDefault(); togglePlay(); return; }
+  if (e.code === "ArrowLeft") { state.sel = Math.max(0, state.sel - 1); renderScore(); return; }
+  if (e.code === "ArrowRight") { state.sel = Math.min(state.len - 1, state.sel + 1); renderScore(); return; }
+  if (e.code === "ArrowUp") { baseOct = Math.min(5, baseOct + 1); document.getElementById("octLabel").textContent = labelOct(); return; }
+  if (e.code === "ArrowDown") { baseOct = Math.max(1, baseOct - 1); document.getElementById("octLabel").textContent = labelOct(); return; }
+  if (e.code === "Delete" || e.code === "Backspace") { if (state.mode === "sfx") clearRange(state.sel, true); return; }
+  if (down.has(e.code)) return;
+  if (KEY_PC[e.code] == null) return;
+  down.add(e.code);
+  const atm = (baseOct - 1) * 12 + KEY_PC[e.code] + 1;
+  if (atm >= 1 && atm <= 63) noteOn(atm, "kb" + e.code);
+});
+window.addEventListener("keyup", e => {
+  down.delete(e.code);
+  if (KEY_PC[e.code] == null) return;
+  const atm = (baseOct - 1) * 12 + KEY_PC[e.code] + 1;
+  noteOff(atm, "kb" + e.code);
+});
+function labelOct() {
+  return "Octave " + baseOct + " · computer keys A–L · ↑↓ octave · ←→ step · Del clear";
+}
+
+/* grow hold while a recorded key is held */
+setInterval(() => {
+  if (!state.recording) return;
+  state.held.forEach(h => {
+    if (h.start >= 0) h.ticks = Math.min(state.len - h.start, (h.ticks || 1) + 1);
+  });
+}, 140);
+
+showHome();
+</script>
+</body>
 </html>
