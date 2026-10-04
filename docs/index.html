@@ -56,11 +56,13 @@
   .row { display: flex; align-items: center; gap: 6px; margin: 4px 0; flex-wrap: wrap; }
   .hint { color: var(--muted); font-size: 12px; }
   .start {
-    display: flex; align-items: flex-start; justify-content: flex-start; gap: 12px;
-    flex-wrap: wrap; padding: 16px 16px 0;
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 16px;
+    flex-wrap: wrap; padding: 24px;
   }
   .start button { padding: 14px 18px; font-size: 15px; border-radius: 6px; }
-  .score-scroll { flex: none; overflow-x: auto; overflow-y: hidden; min-height: 0; padding: 12px 12px 8px; }
+  body.home .work-only { display: none !important; }
+  body.home .panel.left, body.home .panel.right { background: var(--bg); }
+  .score-scroll { flex: 1; overflow: auto; min-height: 0; padding: 0 12px 8px; }
   .score-head {
     display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 12px 12px 8px;
   }
@@ -89,6 +91,37 @@
     position: absolute; right: 0; top: 0; bottom: 0; width: 8px; cursor: ew-resize;
     background: #f4d35e;
   }
+  .track {
+    display: flex; align-items: stretch; margin-bottom: 6px; min-width: max-content;
+  }
+  .gutter {
+    width: 36px; flex: none; position: sticky; left: 0; z-index: 3;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg);
+  }
+  .gutter button { width: 28px; height: 28px; padding: 0; font-weight: 700; }
+  .gutter button.minus { background: var(--warn); border-color: var(--warn); }
+  .lane.fx { min-height: 36px; background: #fff; }
+  .lane.fx .cell { height: 36px; }
+  .fxblock {
+    position: absolute; left: 2px; right: 2px; top: 4px; height: 28px; border-radius: 4px;
+    background: #5d4c4b; color: #fefefd; font: 700 10px/28px ui-monospace, monospace;
+    text-align: center; cursor: grab; z-index: 2; user-select: none;
+  }
+  .fxblock.sel { outline: 2px solid #f4d35e; }
+  .fx-list { display: flex; flex-direction: column; gap: 8px; max-height: calc(100vh - 160px); overflow: auto; }
+  .fx-card {
+    background: #fff; border: 1px solid #4a3b3a; border-radius: 6px; padding: 8px;
+  }
+  .fx-card h3 { margin: 0 0 6px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+  .drag-src {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 72px; height: 28px; margin-top: 6px; padding: 0 8px; border-radius: 4px;
+    background: #5d4c4b; color: #fefefd; font: 700 11px/28px ui-monospace, monospace;
+    cursor: grab; user-select: none;
+  }
+  .lane.drop { outline: 2px dashed #4a3b3a; }
+
   .piano-wrap {
     flex: none; border-top: 3px solid #4a3b3a; background: #fefefd; padding: 8px 12px 12px;
   }
@@ -133,14 +166,14 @@
   }
 </style>
 </head>
-<body>
+<body class="home">
 <header>
   <a class="site-logo" href="https://t-arg.github.io/" title="TEAM a.r.g." target="_blank" rel="noopener noreferrer">
     <img src="data:image/gif;base64,R0lGODlheQAuAMIFAEc8Okg8OUY9Nk5BPv7+/P///////////yH+EUNyZWF0ZWQgd2l0aCBHSU1QACH5BAEKAAcALAAAAAB5AC4AAAP+eHrRHivKSau9OOudA/kf4HBkaZ5PCnEe6DrDKc/z0LpfEG83DqrAxo5GNNk+tkduiOklB74oTheswipJq5CSvSqOBHDux7T0WjCptKeO6iTJ9uu9EJMP4Dz0XKacpw8DXYFyhXR4bIUEh4lLLWINi1N9En9hUIBrSFoqmItfTlaeizF5aZJhjR6Cd2Yve6o4rDqoiks5iCBxakJkjze0m7qeHr24ri9twTlopLY/uDd2ysGRtbdiT2OLwILeOw5Tco2oy4q0VMLPzrqJ6T/h13MPCsU4AIMpAFL428/Fj/b5+KYJWhSBLkQY9BGpGKJp8v75wyGgokUBY6w16jL+ioy6dRPn2LDBgBtDkAbNwUshyF6qgSpcsCoHciY5ew0Y7Hp1aV01W+EAMgQyZwzEcc3cjMzZ0I1JnyF5WXspa+rNeCifDpUEQchUeMy+AopHzg0adw3fwTxqi61XkgA7ivjmDaEsb2jsUvu4UslBrFnL4uyapSqQjn3RIA7rV2HWTWJBkptLZQFAYFrWYL3KUi1Kv48jQua2AJ+xVEDm8tv8zLRZ0DAD6I3KSzOVFfVEnA3CjTNYoJFjvlZV9qRZESIipOhNFHDR38DHwp5H3J3T4TmVB+XNbHYOux4AeL+eODIB3Y3Q34uFfYKSKiuZPTe6mLkD9ETlM8YeP1P+e/foISebPOHMtBBXux2Wj3A92cfJfvKZx41ufsDHxnYQMsbJdvnpt6EVw4imYQWylShgdeLFlOCDCN6X4gMvarHPgwMKJiCJ8A1loYYf2lfeh5dlJqJ9OHKnY3M8inLEckkK1xyQto1QSYp03YddGsg5qANdg1xioJaBrJiWV1S0NF1f7kUyI2bBWRgJlwseKROceM35zSp7tMSNmebRU0lYjOkpHSFbFhfaY+OBIB6fR1ZSTGG3pTgojIvECOSlmLJ4Hj47LUGSZUFyqF+TsPAYJTVnUscgczsJYYef9Ty1HIMs1XlbGUFol6ujuxaJGwOmYQaJH6TAkA6DVQbN1YWuQIBaBbPNkvjErwzcBl1X9JiyCjN4GXpMmlbUE8ggzm65LIkvVBAsQ8Cet4K2jkDXxqe8unpuCqBIGUgd3iDzLQUC5BMDTnUIhAk+JT1aBXgVSlltdviKSwesGwwgEMIo/BABJOBo7O8n4Gb38AoRVzsErCpY8EQNXtTRchaUuLxEw0Hs0G3JeJgp8ZZF9HzCyjRHqx259VLs89E915rFyNUiMgI9uRqN9NQsoMxUNO8+jXXKaFDtNQl08VvKFoKI7XQpcJ79tQQJAAA7" alt="TEAM a.r.g.">
   </a>
   <h1>ATMlib Track Editor <span style="color:#6b5f5e;font-weight:500">v0.0.1</span></h1>
-  <button id="btnNewSong" type="button">New song</button>
-  <button id="btnNewSfx" type="button">New soundfx</button>
+  <button id="btnNewSong" type="button">New ATM song</button>
+  <button id="btnNewSfx" type="button">New ATM sound effect</button>
   <button id="btnImport" type="button">Import songs.h</button>
   <input id="fileSongs" type="file" accept=".h,.c,.txt" hidden>
   <div class="bmc-slot">
@@ -148,15 +181,14 @@
   </div>
 </header>
 <div class="layout">
-  <aside class="panel" id="left">
-    <h2>Later</h2>
-    <p class="hint">Pattern list, channel tools and other song functions will live here.</p>
+  <aside class="panel left" id="left">
+    <div class="work-only" id="leftBody">
+      <h2>Effects</h2>
+      <p class="hint">Drag a block onto an effect line, on the tick you want. One effect type per line.</p>
+      <div class="fx-list" id="fxList"></div>
+    </div>
   </aside>
   <main class="panel main" id="main">
-    <div class="start" id="start">
-      <button id="btnStartSong" type="button">New ATM song</button>
-      <button id="btnStartSfx" type="button">New ATM sound effect</button>
-    </div>
     <div id="songPane" class="score-scroll" hidden>
       <div class="placeholder">
         <h2>ATM song</h2>
@@ -174,8 +206,7 @@
         <span class="hint">Click a cell, then play a key. Hold in Record to lengthen.</span>
       </div>
       <div class="score-scroll" id="scoreScroll">
-        <div class="ruler" id="ruler"></div>
-        <div class="lane" id="lane"></div>
+        <div id="tracks"></div>
       </div>
       <div class="piano-wrap">
         <div class="row">
@@ -186,6 +217,7 @@
     </div>
   </main>
   <aside class="panel right" id="right">
+    <div class="work-only" id="rightBody">
     <h2>Sound effect</h2>
     <p class="hint">One voice, one horizontal score. Notes are ATMlib note numbers (C2 = 1), same mapping as the v0.1.7 tracker.</p>
     <p class="hint"><kbd>Space</kbd> play / stop · <kbd>A</kbd><kbd>W</kbd><kbd>S</kbd><kbd>E</kbd><kbd>D</kbd>… piano · drag a note to move it · drag the yellow edge to change length.</p>
@@ -194,6 +226,7 @@
     <h2>Export</h2>
     <p class="hint">Command / hex export and songs.h import parsing come next. Imported text is shown below for now.</p>
     <pre id="info">—</pre>
+    </div>
   </aside>
 </div>
 <script>
@@ -213,11 +246,17 @@ function atmToFreq(note) {
 function blankSteps(n) {
   return Array.from({length: n}, () => ({note: 0, hold: 0}));
 }
+let fxSeq = 1;
+function blankFxLine() {
+  return { id: fxSeq++, effect: null, cells: Array.from({length: state ? state.len : 32}, () => null) };
+}
 const state = {
   mode: "home",
   steps: blankSteps(32),
   len: 32,
   sel: 0,
+  fxLines: [],
+  selFx: null,
   recording: true,
   playing: false,
   held: new Map(),
@@ -349,47 +388,174 @@ function paintPiano(atm, on) {
 }
 
 function renderScore() {
-  const ruler = document.getElementById("ruler");
-  const lane = document.getElementById("lane");
-  ruler.innerHTML = "";
-  lane.innerHTML = "";
-  lane.style.width = (state.len * 28) + "px";
-  ruler.style.width = (state.len * 28) + "px";
-  for (let i = 0; i < state.len; i++) {
-    const mk = document.createElement("div");
-    mk.className = "tickmark";
-    mk.textContent = (i % 4 === 0) ? i : "";
-    ruler.appendChild(mk);
-    const cell = document.createElement("div");
-    cell.className = "cell" + (i === state.sel ? " sel" : "") + (i % 4 === 0 ? " beat" : "");
-    cell.dataset.i = i;
-    cell.onclick = () => { state.sel = i; renderScore(); };
-    lane.appendChild(cell);
-  }
-  for (let i = 0; i < state.len; i++) {
-    const st = state.steps[i];
-    if (!st.note || st.hold < 1) continue;
-    const note = document.createElement("div");
-    note.className = "note";
-    note.style.left = (i * 28 + 1) + "px";
-    note.style.width = (st.hold * 28 - 4) + "px";
-    note.textContent = NOTE_NAMES[st.note] || st.note;
-    const edge = document.createElement("div");
-    edge.className = "edge";
-    note.appendChild(edge);
-    bindNoteDrag(note, edge, i);
-    lane.appendChild(note);
-  }
+  const host = document.getElementById("tracks");
+  host.innerHTML = "";
+  host.appendChild(buildRow("score"));
+  state.fxLines.forEach((line, idx) => host.appendChild(buildRow("fx", line, idx)));
   const st = state.steps[state.sel] || {note: 0, hold: 0};
   const name = st.note ? (NOTE_NAMES[st.note] + "  ATM " + st.note) : (st.hold < 0 ? "hold" : "empty");
-  document.getElementById("stepInfo").textContent = "Tick " + state.sel + " · " + name + (st.hold > 1 ? " · " + st.hold + " ticks" : "");
+  let extra = "";
+  if (state.selFx) {
+    const cell = state.fxLines[state.selFx.line] && state.fxLines[state.selFx.line].cells[state.selFx.tick];
+    extra = cell ? " · " + fxText(state.selFx.effect, cell) : "";
+  }
+  document.getElementById("stepInfo").textContent = "Tick " + state.sel + " · " + name + (st.hold > 1 ? " · " + st.hold + " ticks" : "") + extra;
   const lines = ["// sound effect preview"];
   for (let i = 0; i < state.len; i++) {
     const s = state.steps[i];
     if (s.note && s.hold > 0) lines.push("tick " + i + "  " + (NOTE_NAMES[s.note] || s.note) + "  x" + s.hold);
   }
+  state.fxLines.forEach((line, li) => {
+    line.cells.forEach((c, i) => {
+      if (c) lines.push("fx" + (li + 1) + " tick " + i + "  " + fxText(line.effect, c));
+    });
+  });
   if (lines.length === 1) lines.push("(empty)");
   if (!document.getElementById("info").dataset.import) document.getElementById("info").textContent = lines.join("\n");
+}
+function buildRow(kind, line, idx) {
+  const row = document.createElement("div");
+  row.className = "track";
+  const gutter = document.createElement("div");
+  gutter.className = "gutter";
+  const btn = document.createElement("button");
+  btn.type = "button";
+  if (kind === "score") {
+    btn.textContent = "+";
+    btn.title = "Add effect line";
+    btn.onclick = () => {
+      const line = blankFxLine();
+      line.cells = Array.from({length: state.len}, () => null);
+      state.fxLines.push(line);
+      state.dirty = true;
+      renderScore();
+    };
+  } else {
+    btn.textContent = "−";
+    btn.className = "minus";
+    btn.title = "Delete this effect line";
+    btn.onclick = () => {
+      state.fxLines.splice(idx, 1);
+      state.selFx = null;
+      state.dirty = true;
+      renderScore();
+    };
+  }
+  gutter.appendChild(btn);
+  const lane = document.createElement("div");
+  lane.className = "lane" + (kind === "fx" ? " fx" : "");
+  lane.style.width = (state.len * 28) + "px";
+  lane.dataset.kind = kind;
+  if (line) lane.dataset.line = String(idx);
+  if (kind === "score") {
+    const ruler = document.createElement("div");
+    ruler.className = "ruler";
+    ruler.style.cssText = "position:absolute;left:0;top:0;height:16px;display:flex;";
+    for (let i = 0; i < state.len; i++) {
+      const mk = document.createElement("div");
+      mk.className = "tickmark";
+      mk.textContent = (i % 4 === 0) ? i : "";
+      ruler.appendChild(mk);
+    }
+    lane.appendChild(ruler);
+    lane.style.paddingTop = "16px";
+    lane.style.height = "88px";
+  }
+  for (let i = 0; i < state.len; i++) {
+    const cell = document.createElement("div");
+    cell.className = "cell" + (kind === "score" && i === state.sel ? " sel" : "") + (i % 4 === 0 ? " beat" : "");
+    cell.dataset.i = i;
+    if (kind === "score") cell.onclick = () => { state.sel = i; state.selFx = null; renderScore(); };
+    lane.appendChild(cell);
+  }
+  if (kind === "score") {
+    for (let i = 0; i < state.len; i++) {
+      const st = state.steps[i];
+      if (!st.note || st.hold < 1) continue;
+      const note = document.createElement("div");
+      note.className = "note";
+      note.style.left = (i * 28 + 1) + "px";
+      note.style.width = (st.hold * 28 - 4) + "px";
+      note.style.top = "28px";
+      note.textContent = NOTE_NAMES[st.note] || st.note;
+      const edge = document.createElement("div");
+      edge.className = "edge";
+      note.appendChild(edge);
+      bindNoteDrag(note, edge, i);
+      lane.appendChild(note);
+    }
+  } else {
+    enableFxDrop(lane, idx);
+    line.cells.forEach((c, i) => {
+      if (!c) return;
+      const block = document.createElement("div");
+      block.className = "fxblock" + (state.selFx && state.selFx.line === idx && state.selFx.tick === i ? " sel" : "");
+      block.style.left = (i * 28 + 2) + "px";
+      block.style.width = "24px";
+      block.style.background = FX_DEFS[line.effect].color;
+      block.textContent = fxShort(line.effect, c);
+      block.title = FX_DEFS[line.effect].name + " · drag to move · Del to remove";
+      block.onclick = e => {
+        e.stopPropagation();
+        state.selFx = { line: idx, tick: i, effect: line.effect };
+        syncDials(line.effect, c);
+        renderScore();
+      };
+      block.draggable = true;
+      block.ondragstart = ev => {
+        ev.dataTransfer.setData("text/plain", JSON.stringify({ from: "lane", line: idx, tick: i, effect: line.effect, cell: c }));
+        ev.dataTransfer.effectAllowed = "move";
+      };
+      lane.appendChild(block);
+    });
+  }
+  row.appendChild(gutter);
+  row.appendChild(lane);
+  return row;
+}
+function tickFromEvent(lane, e) {
+  const rect = lane.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  return Math.max(0, Math.min(state.len - 1, Math.floor(x / 28)));
+}
+function enableFxDrop(lane, idx) {
+  lane.ondragover = e => {
+    e.preventDefault();
+    lane.classList.add("drop");
+    e.dataTransfer.dropEffect = "copy";
+  };
+  lane.ondragleave = () => lane.classList.remove("drop");
+  lane.ondrop = e => {
+    e.preventDefault();
+    lane.classList.remove("drop");
+    let data = {};
+    try { data = JSON.parse(e.dataTransfer.getData("text/plain") || "{}"); } catch (err) {}
+    const tick = tickFromEvent(lane, e);
+    const line = state.fxLines[idx];
+    if (data.from === "lane") {
+      const src = state.fxLines[data.line];
+      if (!src) return;
+      const moving = src.cells[data.tick];
+      if (!moving) return;
+      const effect = src.effect;
+      if (line.effect && line.effect !== effect) return;
+      src.cells[data.tick] = null;
+      if (!src.cells.some(Boolean)) src.effect = null;
+      line.effect = effect;
+      line.cells[tick] = moving;
+      state.selFx = { line: idx, tick, effect };
+      syncDials(effect, moving);
+    } else {
+      if (!FX_DEFS[data.effect]) return;
+      if (line.effect && line.effect !== data.effect) return;
+      line.effect = data.effect;
+      line.cells[tick] = data.cell;
+      state.selFx = { line: idx, tick, effect: data.effect };
+      syncDials(data.effect, data.cell);
+    }
+    state.dirty = true;
+    renderScore();
+  };
 }
 function bindNoteDrag(note, edge, head) {
   note.onmousedown = e => {
@@ -447,10 +613,9 @@ function paintMove(from, to, dur, atm) {
 }
 function showHome() {
   state.mode = "home";
-  document.getElementById("start").hidden = false;
+  document.body.classList.add("home");
   document.getElementById("songPane").hidden = true;
   document.getElementById("sfxPane").hidden = true;
-  document.getElementById("stepInfo").textContent = "No sound effect yet.";
 }
 function confirmReset() {
   if (!state.dirty) return true;
@@ -460,7 +625,7 @@ function newSong() {
   if (!confirmReset()) return;
   state.dirty = false;
   state.mode = "song";
-  document.getElementById("start").hidden = true;
+  document.body.classList.remove("home");
   document.getElementById("sfxPane").hidden = true;
   document.getElementById("songPane").hidden = false;
   document.getElementById("stepInfo").textContent = "Song editor is not built yet.";
@@ -471,11 +636,13 @@ function newSfx() {
   state.steps = blankSteps(32);
   state.len = 32;
   state.sel = 0;
+  state.fxLines = [];
+  state.selFx = null;
   state.recording = true;
   state.dirty = false;
   state.mode = "sfx";
   document.getElementById("sfxLen").value = 32;
-  document.getElementById("start").hidden = true;
+  document.body.classList.remove("home");
   document.getElementById("songPane").hidden = true;
   document.getElementById("sfxPane").hidden = false;
   document.getElementById("btnRec").classList.add("active");
@@ -484,9 +651,7 @@ function newSfx() {
   renderScore();
 }
 document.getElementById("btnNewSong").onclick = newSong;
-document.getElementById("btnStartSong").onclick = newSong;
 document.getElementById("btnNewSfx").onclick = newSfx;
-document.getElementById("btnStartSfx").onclick = newSfx;
 document.getElementById("btnImport").onclick = () => document.getElementById("fileSongs").click();
 document.getElementById("fileSongs").onchange = async e => {
   const f = e.target.files[0];
@@ -501,6 +666,10 @@ document.getElementById("sfxLen").onchange = e => {
   e.target.value = n;
   if (n > state.steps.length) state.steps.push(...blankSteps(n - state.steps.length));
   state.len = n;
+  state.fxLines.forEach(line => {
+    if (line.cells.length < n) line.cells.push(...Array.from({length: n - line.cells.length}, () => null));
+    line.cells.length = n;
+  });
   state.sel = Math.min(state.sel, n - 1);
   state.dirty = true;
   renderScore();
@@ -559,7 +728,17 @@ window.addEventListener("keydown", e => {
   if (e.code === "ArrowRight") { state.sel = Math.min(state.len - 1, state.sel + 1); renderScore(); return; }
   if (e.code === "ArrowUp") { baseOct = Math.min(5, baseOct + 1); document.getElementById("octLabel").textContent = labelOct(); return; }
   if (e.code === "ArrowDown") { baseOct = Math.max(1, baseOct - 1); document.getElementById("octLabel").textContent = labelOct(); return; }
-  if (e.code === "Delete" || e.code === "Backspace") { if (state.mode === "sfx") clearRange(state.sel, true); return; }
+  if (e.code === "Delete" || e.code === "Backspace") {
+    if (state.selFx) {
+      const line = state.fxLines[state.selFx.line];
+      if (line) line.cells[state.selFx.tick] = null;
+      if (line && !line.cells.some(Boolean)) line.effect = null;
+      state.selFx = null;
+      state.dirty = true;
+      renderScore();
+    } else if (state.mode === "sfx") clearRange(state.sel, true);
+    return;
+  }
   if (down.has(e.code)) return;
   if (KEY_PC[e.code] == null) return;
   down.add(e.code);
@@ -584,6 +763,94 @@ setInterval(() => {
   });
 }, 140);
 
+const FX_DEFS = {
+  vol: { name: "Set volume", short: "VOL", mac: "ATM_VOL", color: "#5d4c4b", hint: "0–63", args: [{k:"v", label:"volume", min:0, max:63, def:48}] },
+  slvol: { name: "Volume slide", short: "SL", mac: "ATM_SL_VOL", color: "#3d5c4a", hint: "−63–64", args: [{k:"d", label:"slide", min:-63, max:64, def:-8}] },
+  slvola: { name: "Volume slide advanced", short: "SLA", mac: "ATM_SL_VOL_ADV", color: "#3d4a6b", hint: "amount −63–63, per ticks 0–63", args: [{k:"a", label:"amount", min:-63, max:63, def:-4}, {k:"t", label:"per ticks", min:0, max:63, def:2}] },
+  slvoloff: { name: "Slide volume off", short: "OFF", mac: "ATM_SL_VOL_OFF", color: "#6b3d3d", hint: "no value", args: [] }
+};
+const palette = {};
+function freshCell(id) {
+  const cell = { effect: id };
+  FX_DEFS[id].args.forEach(a => cell[a.k] = palette[id][a.k]);
+  return cell;
+}
+function fxShort(id, cell) {
+  const d = FX_DEFS[id];
+  if (!d.args.length) return d.short;
+  return d.args.map(a => cell[a.k]).join("/");
+}
+function fxText(id, cell) {
+  const d = FX_DEFS[id];
+  if (!d.args.length) return d.mac;
+  return d.mac + "(" + d.args.map(a => cell[a.k]).join(", ") + ")";
+}
+function syncDials(id, cell) {
+  FX_DEFS[id].args.forEach(a => {
+    const input = document.getElementById("dial-" + id + "-" + a.k);
+    const val = document.getElementById("val-" + id + "-" + a.k);
+    if (!input) return;
+    input.value = cell[a.k];
+    val.textContent = cell[a.k];
+    palette[id][a.k] = cell[a.k];
+  });
+  paintDrag(id);
+}
+function paintDrag(id) {
+  const el = document.getElementById("drag-" + id);
+  if (!el) return;
+  const d = FX_DEFS[id];
+  el.textContent = d.args.length ? d.short + " " + d.args.map(a => palette[id][a.k]).join("/") : d.short;
+  el.style.background = d.color;
+}
+function buildFxList() {
+  const host = document.getElementById("fxList");
+  Object.entries(FX_DEFS).forEach(([id, d]) => {
+    palette[id] = {};
+    d.args.forEach(a => palette[id][a.k] = a.def);
+    const card = document.createElement("div");
+    card.className = "fx-card";
+    card.innerHTML = "<h3>" + d.name + "</h3>";
+    d.args.forEach(a => {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = '<label>' + a.label + '</label><input id="dial-' + id + '-' + a.k + '" type="range" min="' + a.min + '" max="' + a.max + '" value="' + a.def + '"><span id="val-' + id + '-' + a.k + '">' + a.def + '</span>';
+      card.appendChild(row);
+      row.querySelector("input").oninput = e => {
+        palette[id][a.k] = +e.target.value;
+        document.getElementById("val-" + id + "-" + a.k).textContent = palette[id][a.k];
+        paintDrag(id);
+        if (state.selFx && state.selFx.effect === id) {
+          const line = state.fxLines[state.selFx.line];
+          const cell = line && line.cells[state.selFx.tick];
+          if (cell) { cell[a.k] = palette[id][a.k]; state.dirty = true; renderScore(); }
+        }
+      };
+    });
+    if (!d.args.length) {
+      const p = document.createElement("p");
+      p.className = "hint";
+      p.textContent = "No value. Drop the block on a tick to turn the slide off.";
+      card.appendChild(p);
+    }
+    const drag = document.createElement("div");
+    drag.className = "drag-src";
+    drag.id = "drag-" + id;
+    drag.draggable = true;
+    drag.ondragstart = e => {
+      e.dataTransfer.setData("text/plain", JSON.stringify({ effect: id, cell: freshCell(id) }));
+      e.dataTransfer.effectAllowed = "copy";
+    };
+    card.appendChild(drag);
+    const hint = document.createElement("p");
+    hint.className = "hint";
+    hint.textContent = d.mac + " · " + d.hint;
+    card.appendChild(hint);
+    host.appendChild(card);
+    paintDrag(id);
+  });
+}
+buildFxList();
 showHome();
 </script>
 </body>
