@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ATMlib Song Editor – Manual</title>
+<link href="https://fonts.googleapis.com/css?family=Cookie&display=swap" rel="stylesheet" />
+<style>
+:root{--bg:#fefefd;--panel:#f5f5f3;--ink:#333;--muted:#6b5f5e;--accent:#4a3b3a;--yellow:#f4d35e}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.65 "Segoe UI",Tahoma,Geneva,Verdana,sans-serif;background:var(--bg);color:var(--ink)}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:8px 20px;border-bottom:3px solid var(--accent);box-shadow:0 2px 4px rgba(0,0,0,.1);position:sticky;top:0;background:var(--bg);z-index:5}
+header img{height:46px;display:block}
+header h1{font-size:18px;margin:0;color:var(--accent);letter-spacing:.04em}
+header a.back{margin-left:auto;color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:4px 10px;text-decoration:none;background:var(--yellow);font-weight:600}
+.wrap{display:grid;grid-template-columns:230px minmax(0,1fr);max-width:1100px;margin:0 auto;gap:30px;padding:24px 20px 80px}
+nav{position:sticky;top:80px;align-self:start;font-size:14px}
+nav a{display:block;padding:3px 10px;color:var(--accent);text-decoration:none;border-left:3px solid transparent}
+nav a:hover{border-left-color:var(--yellow);background:var(--panel)}
+nav b{display:block;margin:12px 10px 4px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+main h2{margin:44px 0 8px;padding-top:10px;color:var(--accent);border-top:1px solid #ddd;font-size:24px}
+main h2:first-of-type{border-top:0;margin-top:0}
+main h3{margin:26px 0 4px;color:var(--accent);font-size:17px}
+p,li{max-width:70ch}
+kbd{font:13px ui-monospace,monospace;border:1px solid var(--accent);border-bottom-width:2px;border-radius:3px;padding:0 5px;background:#fff;white-space:nowrap}
+code{font:13.5px ui-monospace,monospace;background:var(--panel);padding:1px 5px;border-radius:3px}
+pre{background:#fff;border:1px solid var(--accent);border-radius:4px;padding:12px;overflow:auto;font:13px/1.5 ui-monospace,monospace}
+.tip,.warn{border-radius:6px;padding:10px 14px;margin:14px 0;max-width:70ch}
+.tip{background:#fff6d6;border:1px solid #d6b73c}
+.warn{background:#fbe3df;border:1px solid #c0392b}
+.tip b,.warn b{display:block;margin-bottom:2px}
+table{border-collapse:collapse;margin:12px 0;font-size:14.5px}
+td,th{border:1px solid #ddd;padding:5px 10px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding:4px 0 4px 40px;margin:8px 0}
+.steps li:before{content:counter(s);position:absolute;left:0;top:3px;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;text-align:center;line-height:28px;font-weight:600;font-size:14px}
+.bmc{display:inline-flex;align-items:center;margin-top:30px;color:#fefefd;background:#5d4c4b;height:52px;border-radius:12px;font:26px "Cookie",cursive;padding:0 22px;text-decoration:none}
+@media(max-width:800px){.wrap{grid-template-columns:1fr}nav{position:static}}
+</style></head><body>
+<header>
+  <a href="https://t-arg.github.io/" target="_blank" rel="noopener"><img src="data:image/gif;base64,R0lGODlheQAuAMIFAEc8Okg8OUY9Nk5BPv7+/P///////////yH+EUNyZWF0ZWQgd2l0aCBHSU1QACH5BAEKAAcALAAAAAB5AC4AAAP+eHrRHivKSau9OOudA/kf4HBkaZ5PCnEe6DrDKc/z0LpfEG83DqrAxo5GNNk+tkduiOklB74oTheswipJq5CSvSqOBHDux7T0WjCptKeO6iTJ9uu9EJMP4Dz0XKacpw8DXYFyhXR4bIUEh4lLLWINi1N9En9hUIBrSFoqmItfTlaeizF5aZJhjR6Cd2Yve6o4rDqoiks5iCBxakJkjze0m7qeHr24ri9twTlopLY/uDd2ysGRtbdiT2OLwILeOw5Tco2oy4q0VMLPzrqJ6T/h13MPCsU4AIMpAFL428/Fj/b5+KYJWhSBLkQY9BGpGKJp8v75wyGgokUBY6w16jL+ioy6dRPn2LDBgBtDkAbNwUshyF6qgSpcsCoHciY5ew0Y7Hp1aV01W+EAMgQyZwzEcc3cjMzZ0I1JnyF5WXspa+rNeCifDpUEQchUeMy+AopHzg0adw3fwTxqi61XkgA7ivjmDaEsb2jsUvu4UslBrFnL4uyapSqQjn3RIA7rV2HWTWJBkptLZQFAYFrWYL3KUi1Kv48jQua2AJ+xVEDm8tv8zLRZ0DAD6I3KSzOVFfVEnA3CjTNYoJFjvlZV9qRZESIipOhNFHDR38DHwp5H3J3T4TmVB+XNbHYOux4AeL+eODIB3Y3Q34uFfYKSKiuZPTe6mLkD9ETlM8YeP1P+e/foISebPOHMtBBXux2Wj3A92cfJfvKZx41ufsDHxnYQMsbJdvnpt6EVw4imYQWylShgdeLFlOCDCN6X4gMvarHPgwMKJiCJ8A1loYYf2lfeh5dlJqJ9OHKnY3M8inLEckkK1xyQto1QSYp03YddGsg5qANdg1xioJaBrJiWV1S0NF1f7kUyI2bBWRgJlwseKROceM35zSp7tMSNmebRU0lYjOkpHSFbFhfaY+OBIB6fR1ZSTGG3pTgojIvECOSlmLJ4Hj47LUGSZUFyqF+TsPAYJTVnUscgczsJYYef9Ty1HIMs1XlbGUFol6ujuxaJGwOmYQaJH6TAkA6DVQbN1YWuQIBaBbPNkvjErwzcBl1X9JiyCjN4GXpMmlbUE8ggzm65LIkvVBAsQ8Cet4K2jkDXxqe8unpuCqBIGUgd3iDzLQUC5BMDTnUIhAk+JT1aBXgVSlltdviKSwesGwwgEMIo/BABJOBo7O8n4Gb38AoRVzsErCpY8EQNXtTRchaUuLxEw0Hs0G3JeJgp8ZZF9HzCyjRHqx259VLs89E915rFyNUiMgI9uRqN9NQsoMxUNO8+jXXKaFDtNQl08VvKFoKI7XQpcJ79tQQJAAA7" alt="TEAM a.r.g."></a>
+  <h1>ATMlib Song Editor <span style="color:#6b5f5e;font-weight:500">manual · v1.0.0</span></h1>
+  <a class="back" href="index.html">← Back to the editor</a>
+</header>
+<div class="wrap">
+<nav>
+  <b>Start here</b>
+  <a href="#what">What is this?</a>
+  <a href="#quick">Your first song in 5 minutes</a>
+  <a href="#screen">The screen</a>
+  <b>Making music</b>
+  <a href="#patterns">Patterns</a>
+  <a href="#roll">Writing notes</a>
+  <a href="#drums">Drums</a>
+  <a href="#instruments">Instruments</a>
+  <a href="#arrange">The arrangement</a>
+  <a href="#effects">Effects</a>
+  <b>Using your song</b>
+  <a href="#play">Listening</a>
+  <a href="#export">Export &amp; use in a game</a>
+  <a href="#files">Saving, opening, importing</a>
+  <b>Reference</b>
+  <a href="#keys">Keyboard shortcuts</a>
+  <a href="#limits">Limits and good habits</a>
+  <a href="#trouble">Something is wrong</a>
+</nav>
+<main>
+
+<h2 id="what">What is this?</h2>
+<p>The ATMlib Song Editor lets you compose chiptune music for the Arduboy and turn it into a <code>.h</code> file you can drop into your sketch. It runs in your browser. Nothing is uploaded anywhere: your song lives on your own computer.</p>
+<p>ATMlib gives you <b>four channels</b>:</p>
+<table>
+<tr><th>Channel</th><th>Sound</th><th>Good for</th></tr>
+<tr><td>CH0</td><td>pulse wave</td><td>lead melody</td></tr>
+<tr><td>CH1</td><td>square wave</td><td>chords, harmony, second melody</td></tr>
+<tr><td>CH2</td><td>sawtooth wave</td><td>bass</td></tr>
+<tr><td>CH3</td><td>noise</td><td>drums</td></tr>
+</table>
+<p>Each channel plays one sound at a time, like a single instrument. That is the whole trick of chiptune: a small sound chip, clever tricks, and a lot of character.</p>
+<p>The editor only makes <b>songs</b>. Sound effects will get their own editor.</p>
+
+<h2 id="quick">Your first song in 5 minutes</h2>
+<p>When you open the editor you already get a small example song. Press <kbd>Space</kbd> (or the yellow <b>Play</b> button) to hear it. Press it again to stop. Now make your own:</p>
+<ol class="steps">
+<li>Press <b>Reset</b> or <b>New</b> in the top bar for a clean start. (<b>Reset</b> brings back the example, <b>New</b> gives you an empty song.)</li>
+<li>Open the <b>Drums</b> tab on the left. Press ▶ next to a few grooves until you find one you like, then <b>drag it onto the CH3 lane</b> at the top. Drag it a few times to repeat it.</li>
+<li>Go to the <b>Patterns</b> tab and press <b>+ Tone pattern</b>. In the big piano roll at the bottom, <b>click</b> to put in some notes. Drag to the right while clicking to make a note longer.</li>
+<li>Open the <b>Instruments</b> tab and press <b>Use</b> next to an instrument, for example "Pluck lead". Press ▶ to hear it first.</li>
+<li><b>Drag your pattern</b> from the Patterns list onto the CH0 lane. Press Play and listen.</li>
+<li>Open <b>Export</b> (top right), press <b>Copy</b> or <b>Download</b>, and you have your song file.</li>
+</ol>
+<div class="tip"><b>Tip</b>Everything can be undone with <kbd>Ctrl</kbd>+<kbd>Z</kbd> (<kbd>Cmd</kbd>+<kbd>Z</kbd> on a Mac). Try things out freely.</div>
+
+<h2 id="screen">The screen</h2>
+<p>The editor has three columns and a top bar.</p>
+<h3>Top bar</h3>
+<ul>
+<li><b>Play / Stop</b> and <b>Tempo</b> – how fast the song plays. See <a href="#limits">Limits</a>.</li>
+<li><b>↶ ↷</b> – undo and redo.</li>
+<li><b>New</b> – an empty song. <b>Reset</b> – forget the autosave and go back to the example song. <b>Open</b> / <b>Save</b> – your project file. <b>Import song.h</b> – load an existing ATMlib song.</li>
+<li><b>Manual</b> – this page.</li>
+</ul>
+<h3>Left column</h3>
+<p>Three tabs with the building blocks: <b>Patterns</b> (your own bits of music), <b>Drums</b> (ready-made drum parts and the drum kit) and <b>Instruments</b> (ready-made sounds).</p>
+<h3>Middle</h3>
+<p>The top half is the <b>arrangement</b>: four lanes, one per channel, where you line up your patterns in time. The bottom half is the <b>pattern editor</b>, where you write the notes of the pattern you have selected.</p>
+<h3>Right column</h3>
+<p>Three tabs: <b>Song</b> (name, tempo, loop, volume), <b>Selection</b> (details of whatever you have selected: transposition, instrument, effects) and <b>Export</b>.</p>
+
+<h2 id="patterns">Patterns</h2>
+<p>A <b>pattern</b> is a short piece of music, usually one bar or a few. You write it once and then place it in your song as often as you like. Placing the same pattern ten times costs almost nothing in the final file, so reuse is the way to keep songs small.</p>
+<ul>
+<li><b>+ Tone pattern</b> makes a pattern for melodies and bass (channels CH0 to CH2).</li>
+<li><b>+ Drum pattern</b> makes a pattern for drums (channel CH3 only).</li>
+<li>Click a pattern in the list to open it in the editor. Rename it, change its <b>Length</b> (in ticks) or press <b>Duplicate</b>, <b>Clear</b> or <b>Delete</b> above the editor.</li>
+<li>Patterns have a colour. You can change it in the Selection tab.</li>
+</ul>
+<p>The length is counted in <b>ticks</b>. The editor uses 16 ticks per beat and 64 ticks per bar. A 64-tick pattern is one bar; a 128-tick one is two bars. The buttons 16, 32, 64 and 128 are shortcuts.</p>
+<div class="tip"><b>Tip</b>Most songs are easiest if every pattern is the same length (64 ticks). Different lengths are fine, but the lanes will then drift apart and you will need to keep an eye on them. Drum parts can be any length, for instance 36 ticks for a waltz.</div>
+
+<h2 id="roll">Writing notes (the piano roll)</h2>
+<p>When a tone pattern is selected you see a piano roll. High notes are at the top, time runs left to right.</p>
+<table>
+<tr><th>You want to…</th><th>Do this</th></tr>
+<tr><td>add a note</td><td>click in an empty spot. Hold the button and drag right to make it longer</td></tr>
+<tr><td>move a note</td><td>drag it</td></tr>
+<tr><td>change its length</td><td>drag its right edge</td></tr>
+<tr><td>delete a note</td><td>right-click it (or <kbd>Shift</kbd>+click)</td></tr>
+<tr><td>hear a pitch</td><td>click on the piano keys on the left</td></tr>
+<tr><td>snap notes more roughly or finely</td><td>change <b>Grid</b> (1, 2, 4, 8 or 16 ticks)</td></tr>
+<tr><td>zoom</td><td>the <b>Zoom</b> slider</td></tr>
+</table>
+<p>One channel can only play <b>one note at a time</b>. If you put a note on top of another, the new one wins and the old one is shortened. That is how the hardware works, and it is why chords need a trick (see <a href="#instruments">Instruments</a>).</p>
+<h3>Typing notes with the keyboard</h3>
+<p>Click once in the roll to place the red cursor, then use the computer keyboard like a piano:</p>
+<pre> W E   T Y U   O P
+A S D F G H J K L ;
+C D E F G A B C D E</pre>
+<p>Each key you press writes a note at the cursor and moves the cursor on by the length of your last note. <kbd>Z</kbd> and <kbd>X</kbd> go down and up an octave (the current octave is shown above the roll). The arrow keys move the cursor left and right. <kbd>Delete</kbd> removes the note at the cursor.</p>
+<p>The range is C2 to D7. That is 63 notes, and it is all the chip can do.</p>
+
+<h2 id="drums">Drums</h2>
+<p>Good drums are hard to build by hand, so the editor comes with <b>ready-made drum parts</b>. Open the <b>Drums</b> tab:</p>
+<ul>
+<li><b>Grooves</b> are one-bar beats (Italo disco, house, rock, funk, breakbeat, waltz and more).</li>
+<li><b>Building blocks</b> are small half-bar pieces to make your own beat from.</li>
+<li><b>Fills and rolls</b> are for the end of a phrase: snare rolls, build-ups, a crash to mark a new section.</li>
+</ul>
+<p>Press <b>▶</b> to listen. <b>Drag</b> a part onto the CH3 lane to use it, or press <b>+</b> to add it to your patterns list first. A good rhythm: use a groove three times, then a "+ roll" version as the fourth bar.</p>
+<h3>Changing a drum part</h3>
+<p>Select a drum pattern and you get a grid instead of a piano roll. Every row is a drum sound (kick, snare, hats, crash…). <b>Click a cell</b> to put a hit there, click it again to remove it. Hold the button and drag to paint several. You can also type: each row shows a letter (<kbd>K</kbd> kick, <kbd>S</kbd> snare, <kbd>H</kbd> closed hat, <kbd>O</kbd> open hat, <kbd>C</kbd> crash…). Press a letter and a hit appears at the cursor.</p>
+<p>Only one drum can sound at a time. If two hits land on the same tick, the last one wins.</p>
+<h3>The drum kit</h3>
+<p>The channel is noise, and every drum is a burst of noise that gets quieter. At the bottom of the Drums tab, <b>Kit voices</b> lets you change how loud a drum starts (<i>vol</i>) and how fast it dies away (<i>slide</i>, more negative is shorter). A change affects every pattern that uses that drum. <b>Reset kit</b> brings back the defaults.</p>
+
+<h2 id="instruments">Instruments</h2>
+<p>An <b>instrument</b> decides how each note sounds: how loud it starts, how it fades, whether it wobbles or arpeggiates. Without an instrument, notes just play at one steady volume.</p>
+<p>The <b>Instruments</b> tab has ready-made ones, grouped as Lead, Chord, Pad, Bass, Drum and FX. Press <b>▶</b> to hear a short demo, <b>Use</b> to give it to the pattern you have selected (or to a new pattern if none is selected). You can also drag an instrument onto a block in the arrangement.</p>
+<h3>About chords</h3>
+<p>A channel plays one note at a time, so a "chord" is an <b>arpeggio</b>: the chip plays the notes of the chord one after the other so fast that your ear hears them together. The Chord instruments do this for you: write the <i>root note</i> (for instance D), pick "Chord stab (minor)" and you get D minor. Use the "maj", "minor", "Maj7" and "m7" versions to colour your harmony.</p>
+<h3>Making your own</h3>
+<p>Select a pattern, open the <b>Selection</b> tab and scroll to <b>Instrument</b>. Here you can change:</p>
+<table>
+<tr><th>Setting</th><th>What it does</th></tr>
+<tr><td>Volume</td><td>how loud the note starts, 0 to 63</td></tr>
+<tr><td>Fade</td><td>a volume slide makes notes die away (a negative step) or swell (a positive one). A pitch slide makes the note rise or fall. "Every N ticks" makes the slide slower</td></tr>
+<tr><td>Gate</td><td><i>Arpeggio</i> plays a chord quickly. <i>Note gate</i> makes the note sound for only a few ticks and then go quiet (staccato)</td></tr>
+<tr><td>Modulation</td><td><i>Vibrato</i> wobbles the pitch, <i>tremolo</i> wobbles the volume. Depth is how strong, rate is how fast</td></tr>
+<tr><td>Glide</td><td>the pitch slides up or down by a semitone every few ticks</td></tr>
+<tr><td>Cut note at its end</td><td>silences the channel when a note ends and a rest follows</td></tr>
+</table>
+<p>Use <b>▶ Listen</b> to test it. <b>Copy as new</b> keeps the original and gives you your own version.</p>
+<div class="warn"><b>Careful</b>An instrument is shared by every pattern that uses it. If you change "Pluck lead", all patterns using "Pluck lead" change. Use <b>Copy as new</b> if you only want to change one pattern.</div>
+
+<h2 id="arrange">The arrangement</h2>
+<p>The lanes at the top are your song in time, from left to right. Each coloured block is a placement of a pattern.</p>
+<ul>
+<li><b>Add:</b> drag a pattern (or a drum part) from the left onto a lane. A red line shows where it will land. You can also double-click an empty lane to put the currently selected pattern at its end.</li>
+<li><b>Rearrange:</b> drag a block to another spot, even to another lane of the same kind.</li>
+<li><b>Remove:</b> click a block and press <kbd>Delete</kbd>, or use "Remove from lane" in the Selection tab.</li>
+<li><b>Zoom</b> slider: make blocks wider or narrower.</li>
+<li><b>mute</b> (on the left of each lane): silences that channel while you listen. It does <i>not</i> change the exported song.</li>
+</ul>
+<p>Tone patterns go on CH0, CH1 or CH2. Drum patterns go on CH3. If you drop one on the wrong kind of lane, nothing happens.</p>
+<h3>Transposition</h3>
+<p>Click a block and open the <b>Selection</b> tab. <b>Transpose</b> shifts that placement up or down in semitones, without touching the pattern. Write a bass line once, then play it again two semitones higher for the chord change. The buttons add or subtract one octave (12).</p>
+<h3>Make this block unique</h3>
+<p>If a pattern is used many times and you want to change only <i>one</i> of them (say, a different last note in bar 4), press <b>Make this block unique</b>. That block gets its own copy to edit. The other blocks stay as they were.</p>
+<h3>Lanes of different length</h3>
+<p>In a looping song, all channels must be the same length so that they come back together. If one lane is shorter, the editor pads it with silence (the hatched area) when you export. You do not need to fill it yourself.</p>
+
+<h2 id="effects">Effects</h2>
+<p>Besides the instrument, you can place single <b>effects</b> at a point in a pattern: a vibrato that starts halfway, a volume change, a pitch slide. Open the <b>Selection</b> tab and scroll to <b>Effects in this pattern</b>.</p>
+<ol class="steps">
+<li>Click in the piano roll where the effect should start, to place the red cursor.</li>
+<li>Choose the effect type and fill in its numbers.</li>
+<li>Press <b>Add at cursor</b>.</li>
+</ol>
+<p>Effects show as small flags in the strip at the top of the piano roll. Drag a flag to move it. Click one to select it, and use the ✕ in the list to remove it. Most effects have an "off" version to switch them off again.</p>
+<div class="tip"><b>Rules of thumb</b>An arpeggio combined with transposition does not work as you would expect (the library adds the transposition twice). The note gate only works at transposition 0. The editor warns you in the Export tab when it sees these.</div>
+
+<h2 id="play">Listening</h2>
+<ul>
+<li><b>Play</b> (or <kbd>Space</kbd>) plays the whole song. Looping songs repeat forever until you press Stop. A red line moves across the arrangement, and also through the pattern you have open in the editor.</li>
+<li><b>▶ Pattern</b> above the editor plays only that pattern.</li>
+<li>Clicking a note or a drum cell plays it.</li>
+<li>Changes you make while the song is playing are heard the <i>next time</i> you press Play.</li>
+</ul>
+<p>What you hear is made by the real ATMlib playroutine, so it should sound the same on your Arduboy (the Arduboy's tiny speaker will of course colour it).</p>
+
+<h2 id="export">Export and use in a game</h2>
+<p>Open the <b>Export</b> tab. The editor builds the song and tells you the size in bytes and the number of tracks. Fix anything shown in <span style="color:#c0392b">red</span> (a problem that stops the export, for example a note that would go out of range after transposition). Yellow messages are warnings.</p>
+<p>Press <b>Copy</b> or <b>Download</b> to get your <code>.h</code> file. Put it next to your sketch and use it like this:</p>
+<pre>#include "mysong.h"
+
+void setup() {
+  ATM.setTempo(35);   // use the tempo shown in the Export tab
+  ATM.play(mySong);   // use your song's name
+}</pre>
+<p>The name in <code>ATM.play(…)</code> is the <b>Name</b> from the Song tab.</p>
+<p>The editor writes the song the way a human would: short macros like <code>ATM_NOTE_A5</code> and <code>ATM_DELAY(16)</code>, with comments, and tracks sorted so loops are seamless. There is also a "raw bytes (hex)" option if you only want the numbers.</p>
+<h3>Song settings that affect the export</h3>
+<ul>
+<li><b>Loop forever</b> – on: the song repeats seamlessly, without a click or a gap. Off: the song plays once and stops. When it stops the last note is cut, so add a short rest at the end if you want it to ring out.</li>
+<li><b>Put ATM_SET_TEMPO inside the song</b> – normally off, because your sketch sets the tempo. Turn it on if the song should carry its tempo with it.</li>
+<li><b>In-game music volume</b> – lowers all volumes by a percentage (60% is a good start) so the music does not drown out your sound effects. You can change the percentage later in your sketch's header.</li>
+</ul>
+
+<h2 id="files">Saving, opening and importing</h2>
+<ul>
+<li><b>Autosave:</b> the editor remembers your song in the browser. If you reload the page, it comes back. This is only stored in <i>this</i> browser on <i>this</i> computer, so do not rely on it for songs you care about.</li>
+<li><b>Save</b> downloads a project file (<code>.atmsong.json</code>) with everything: patterns, instruments, arrangement. Keep these safe. <b>Open</b> loads one again.</li>
+<li><b>Import song.h</b> reads an existing ATMlib song file and turns it into patterns you can edit. If the file holds several songs, a window lets you pick one (you can listen to each first). The import cannot know your original patterns, so it cuts the song into bars. The sound should be the same, but the result is usually larger and less tidy than a song you built in the editor. If the song has volume macros (MV/MS), it is imported at its current volume.</li>
+<li><b>Reset</b> forgets the autosave and brings back the example song. <b>New</b> starts empty.</li>
+</ul>
+<div class="tip"><b>Tip</b>Save a project file before you import or reset. Both can be undone with <kbd>Ctrl</kbd>+<kbd>Z</kbd> right afterwards, but not after you close the page.</div>
+
+<h2 id="keys">Keyboard shortcuts</h2>
+<table>
+<tr><th>Keys</th><th>Action</th></tr>
+<tr><td><kbd>Space</kbd></td><td>play / stop the song</td></tr>
+<tr><td><kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Z</kbd></td><td>undo</td></tr>
+<tr><td><kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd> or <kbd>Ctrl</kbd> + <kbd>Y</kbd></td><td>redo</td></tr>
+<tr><td><kbd>A</kbd> <kbd>W</kbd> <kbd>S</kbd> <kbd>E</kbd> <kbd>D</kbd> <kbd>F</kbd> <kbd>T</kbd> <kbd>G</kbd> <kbd>Y</kbd> <kbd>H</kbd> <kbd>U</kbd> <kbd>J</kbd> <kbd>K</kbd> <kbd>O</kbd> <kbd>L</kbd> <kbd>P</kbd> <kbd>;</kbd></td><td>write a note (tone pattern)</td></tr>
+<tr><td><kbd>Z</kbd> / <kbd>X</kbd></td><td>octave down / up</td></tr>
+<tr><td><kbd>K</kbd> <kbd>L</kbd> <kbd>S</kbd> <kbd>T</kbd> <kbd>G</kbd> <kbd>H</kbd> <kbd>O</kbd> <kbd>C</kbd> <kbd>R</kbd></td><td>write a drum hit (drum pattern): kick, long kick, snare, tight snare, ghost snare, hat, open hat, crash, roll</td></tr>
+<tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>move the cursor by one grid step</td></tr>
+<tr><td><kbd>Delete</kbd></td><td>remove the selected block, or the note / hit at the cursor</td></tr>
+<tr><td>right-click or <kbd>Shift</kbd>+click</td><td>delete a note</td></tr>
+</table>
+<p>The keys only work when you are not typing in a text box.</p>
+
+<h2 id="limits">Limits and good habits</h2>
+<h3>Tempo and time</h3>
+<p>Time is counted in <b>ticks</b>. The <b>tempo</b> is the number of ticks per second. At tempo 35 a bar of 64 ticks lasts about 1.8 seconds. A rough conversion: tempo × 3.75 ≈ beats per minute.</p>
+<h3>Size</h3>
+<p>An Arduboy has very little memory, and the song takes space in it. The Export tab shows the size. To keep it small:</p>
+<ul>
+<li>reuse patterns instead of writing out every bar;</li>
+<li>use transposition to play the same pattern in another key;</li>
+<li>keep the number of different effects per pattern low.</li>
+</ul>
+<p>The editor already removes repeated commands and turns repeated bars into loops for you.</p>
+<h3>The chip's rules</h3>
+<ul>
+<li>One note at a time per channel.</li>
+<li>Notes from C2 to D7 only (after transposition too).</li>
+<li>Volumes run from 0 to 63.</li>
+<li>CH3 is noise only, so drums go there, and nothing else.</li>
+</ul>
+
+<h2 id="trouble">Something is wrong</h2>
+<table>
+<tr><th>Problem</th><th>Try this</th></tr>
+<tr><td>No sound</td><td>Check that your computer is not muted. Press Play once more. Check that the lane's button does not say "muted". Some browsers only allow sound after you click on the page.</td></tr>
+<tr><td>A lane is empty</td><td>Is a tone pattern on a tone lane and a drum pattern on CH3? A pattern with no notes makes no sound.</td></tr>
+<tr><td>Notes sound very plain</td><td>The pattern has no instrument. Pick one in the Instruments tab.</td></tr>
+<tr><td>I cannot drop a pattern on a lane</td><td>Drum patterns only go on CH3, and tone patterns only on CH0 to CH2.</td></tr>
+<tr><td>The Export tab shows a red message</td><td>Read it: it names the pattern and the problem, for example a note that is out of range after transposition.</td></tr>
+<tr><td>I changed something and it affects everything</td><td>Patterns and instruments are shared. Use "Make this block unique" or "Copy as new". <kbd>Ctrl</kbd>+<kbd>Z</kbd> undoes it.</td></tr>
+<tr><td>The last note of my one-shot song is cut off</td><td>Add a rest at the end, or tick "Loop forever".</td></tr>
+<tr><td>I lost my song after clearing browser data</td><td>Autosave lives in the browser. Use <b>Save</b> to keep a project file.</td></tr>
+</table>
+
+<p>Made by TEAM a.r.g. If this tool is useful to you, a coffee is always welcome:</p>
+<a class="bmc" href="https://buymeacoffee.com/TEAMarg" target="_blank" rel="noopener">☕ &nbsp;Cool tool? Buy us a coffee</a>
+</main>
+</div>
+</body></html>
