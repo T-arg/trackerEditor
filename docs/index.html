@@ -88,7 +88,7 @@ a.manual:hover{background:#e8c443}
 </head><body>
 <header>
   <a class="site-logo" href="https://t-arg.github.io/" title="TEAM a.r.g." target="_blank" rel="noopener noreferrer"><img src="data:image/gif;base64,R0lGODlheQAuAMIFAEc8Okg8OUY9Nk5BPv7+/P///////////yH+EUNyZWF0ZWQgd2l0aCBHSU1QACH5BAEKAAcALAAAAAB5AC4AAAP+eHrRHivKSau9OOudA/kf4HBkaZ5PCnEe6DrDKc/z0LpfEG83DqrAxo5GNNk+tkduiOklB74oTheswipJq5CSvSqOBHDux7T0WjCptKeO6iTJ9uu9EJMP4Dz0XKacpw8DXYFyhXR4bIUEh4lLLWINi1N9En9hUIBrSFoqmItfTlaeizF5aZJhjR6Cd2Yve6o4rDqoiks5iCBxakJkjze0m7qeHr24ri9twTlopLY/uDd2ysGRtbdiT2OLwILeOw5Tco2oy4q0VMLPzrqJ6T/h13MPCsU4AIMpAFL428/Fj/b5+KYJWhSBLkQY9BGpGKJp8v75wyGgokUBY6w16jL+ioy6dRPn2LDBgBtDkAbNwUshyF6qgSpcsCoHciY5ew0Y7Hp1aV01W+EAMgQyZwzEcc3cjMzZ0I1JnyF5WXspa+rNeCifDpUEQchUeMy+AopHzg0adw3fwTxqi61XkgA7ivjmDaEsb2jsUvu4UslBrFnL4uyapSqQjn3RIA7rV2HWTWJBkptLZQFAYFrWYL3KUi1Kv48jQua2AJ+xVEDm8tv8zLRZ0DAD6I3KSzOVFfVEnA3CjTNYoJFjvlZV9qRZESIipOhNFHDR38DHwp5H3J3T4TmVB+XNbHYOux4AeL+eODIB3Y3Q34uFfYKSKiuZPTe6mLkD9ETlM8YeP1P+e/foISebPOHMtBBXux2Wj3A92cfJfvKZx41ufsDHxnYQMsbJdvnpt6EVw4imYQWylShgdeLFlOCDCN6X4gMvarHPgwMKJiCJ8A1loYYf2lfeh5dlJqJ9OHKnY3M8inLEckkK1xyQto1QSYp03YddGsg5qANdg1xioJaBrJiWV1S0NF1f7kUyI2bBWRgJlwseKROceM35zSp7tMSNmebRU0lYjOkpHSFbFhfaY+OBIB6fR1ZSTGG3pTgojIvECOSlmLJ4Hj47LUGSZUFyqF+TsPAYJTVnUscgczsJYYef9Ty1HIMs1XlbGUFol6ujuxaJGwOmYQaJH6TAkA6DVQbN1YWuQIBaBbPNkvjErwzcBl1X9JiyCjN4GXpMmlbUE8ggzm65LIkvVBAsQ8Cet4K2jkDXxqe8unpuCqBIGUgd3iDzLQUC5BMDTnUIhAk+JT1aBXgVSlltdviKSwesGwwgEMIo/BABJOBo7O8n4Gb38AoRVzsErCpY8EQNXtTRchaUuLxEw0Hs0G3JeJgp8ZZF9HzCyjRHqx259VLs89E915rFyNUiMgI9uRqN9NQsoMxUNO8+jXXKaFDtNQl08VvKFoKI7XQpcJ79tQQJAAA7" alt="TEAM a.r.g."></a>
-  <h1>ATMlib Song Editor <span style="color:#6b5f5e;font-weight:500">v1.0.1</span></h1>
+  <h1>ATMlib Song Editor <span style="color:#6b5f5e;font-weight:500">v1.1.0</span></h1>
   <span class="sep"></span>
   <button id="btnPlay" class="play">▶ Play</button>
   <label>Tempo <input id="tempo" type="number" min="4" max="255" value="34"></label>
@@ -335,7 +335,7 @@ function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 
 function newSong() {
   return {
-    v: 1, name: 'newSong', title: '', tempo: 34, includeTempo: false, loop: true,
+    v: 1, name: 'newSong', title: '', tempo: 34, includeTempo: false, shrink: false, loop: true,
     gameVol: false, gamePct: 60, barTicks: 64,
     patterns: {}, order: [], lanes: [[], [], [], []], instruments: {}, kit: clone(KIT_DEFAULT),
     seq: 1, mute: [false, false, false, false]
@@ -777,6 +777,31 @@ function buildExport(song, o) {
     T.bytes = []; B.items.forEach(x => x.b.forEach(v => T.bytes.push(v)));
   });
 
+  /* optional: shrink song */
+  const pack = () => {
+    tracks.forEach(T => { T.bytes = []; T.items.forEach(x => x.b.forEach(v => T.bytes.push(v))); });
+    const b = [tracks.length]; let a = 0;
+    tracks.forEach(T => { b.push(a & 255, (a >> 8) & 255); a += T.bytes.length; });
+    for (let c = 0; c < 4; c++) b.push(entryIdx[c]);
+    tracks.forEach(T => T.bytes.forEach(v => b.push(v)));
+    return Uint8Array.from(b);
+  };
+  if (song.shrink) {
+    const before = tracks.map(T => T.items), nBefore = tracks.length, bytesBefore = pack();
+    const made = shrinkTracks(tracks);
+    if (made) {
+      const bytesAfter = pack(); let ok = bytesAfter.length < bytesBefore.length;
+      const span = L * 3 + 64;
+      for (let c = 0; c < 4 && ok; c++) {
+        if (!used[c]) continue;
+        const f1 = flatten(bytesBefore, c, span), f2 = flatten(bytesAfter, c, span);
+        if (f2.maxDepth > 7 || f1.ticks !== f2.ticks || f1.bytes.length !== f2.bytes.length || f1.bytes.some((v, i) => v !== f2.bytes[i])) ok = false;
+      }
+      if (ok) { res.notes.push('Shrink song: ' + made + ' shared track' + (made > 1 ? 's' : '') + ' added, ' + (bytesBefore.length - bytesAfter.length) + ' bytes saved (' + bytesBefore.length + ' to ' + bytesAfter.length + '). Checked tick by tick against the unshrunk song.'); res.saved = bytesBefore.length - bytesAfter.length; }
+      else { tracks.length = nBefore; tracks.forEach((T, i) => { T.items = before[i]; }); pack(); res.notes.push('Shrink song: no safe saving found, song left as it was.'); }
+    } else res.notes.push('Shrink song: nothing repeated enough to save bytes.');
+  }
+
   /* layout */
   const n = tracks.length;
   const offs = []; let acc = 0; tracks.forEach(T => { offs.push(acc); acc += T.bytes.length; });
@@ -794,6 +819,64 @@ function buildExport(song, o) {
   }
   res.ok = res.errors.length === 0;
   return res;
+}
+
+
+/* ---------- shrink song: share repeated runs of commands in extra tracks ---------- */
+function shrinkTracks(tracks, maxLen) {
+  maxLen = maxLen || 48;
+  const key = c => c.b.join(',');
+  const sizeOf = a => a.reduce((n, c) => n + c.b.length, 0);
+  const shareable = (c, ti) => {
+    const o = c.b[0];
+    if (o === 0xFD || o === 0xFE || o === 0x9F || o === 0x9D) return false;
+    if (o === 0xFC && (c.b[1] === ti || tracks[c.b[1]].kind !== 'pat')) return false;
+    return true;
+  };
+  let made = 0;
+  for (;;) {
+    let best = null; const cands = {};
+    tracks.forEach((T, ti) => {
+      if (T.kind === 'stop') return;
+      const it = T.items;
+      for (let i = 0; i < it.length; i++) {
+        for (let L = 2; L <= maxLen && i + L <= it.length; L++) {
+          if (!shareable(it[i + L - 1], ti)) break;
+          const sub = it.slice(i, i + L);
+          cands[sub.map(key).join('|')] = sub;
+        }
+      }
+    });
+    Object.keys(cands).forEach(k => {
+      const sub = cands[k], sb = sizeOf(sub), sk = sub.map(key);
+      if (sb < 3) return;
+      const occ = [];
+      tracks.forEach((T, ti) => {
+        if (T.kind === 'stop') return;
+        const ks = T.items.map(key);
+        for (let i = 0; i + sub.length <= ks.length;) {
+          let m = true;
+          for (let j = 0; j < sk.length; j++) if (ks[i + j] !== sk[j]) { m = false; break; }
+          if (m) { occ.push([ti, i]); i += sub.length; } else i++;
+        }
+      });
+      const u = occ.length; if (u < 2) return;
+      const save = u * sb - (sb + 1 + 2 + 2 * u);
+      if (save > 0 && (!best || save > best.save)) best = { save: save, sub: sub, occ: occ };
+    });
+    if (!best || tracks.length >= 255) break;
+    const idx = tracks.length, len = best.sub.length;
+    const by = {}; best.occ.forEach(o => { (by[o[0]] = by[o[0]] || []).push(o[1]); });
+    Object.keys(by).forEach(ti => {
+      const st = {}; by[ti].forEach(i => { st[i] = 1; });
+      const it = tracks[ti].items, out = [];
+      for (let i = 0; i < it.length;) { if (st[i]) { out.push(cmdGoto(idx, 'shared ' + made)); i += len; } else { out.push(it[i]); i++; } }
+      tracks[ti].items = out;
+    });
+    tracks.push({ kind: 'pat', name: 'shared ' + made, items: best.sub.concat([CMD_RETURN]) });
+    made++;
+  }
+  return made;
 }
 
 /* ---------- text output ---------- */
@@ -1284,7 +1367,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = root.ATMED
 'use strict';
 const A = window.ATMED;
 A.setEngine(function () { return AtmLib(); });
-const VERSION = '1.0.1';
+const VERSION = '1.1.0';
 const $ = s => document.querySelector(s);
 function h(tag, attrs) {
   const el = document.createElement(tag);
@@ -1974,9 +2057,11 @@ let exportCache = null;
 function rightExport(el) {
   const res = A.buildExport(song); exportCache = res;
   el.appendChild(h('h2', null, 'Export song.h'));
+  el.appendChild(h('div', { class: 'row' }, h('label', null, h('input', { type: 'checkbox', checked: !!song.shrink, onchange: e => mutate(() => { song.shrink = e.target.checked; }) }), ' Shrink song (share repeated runs in extra tracks)')));
   if (res.errors.length) { res.errors.forEach(e => el.appendChild(h('div', { class: 'msg err' }, e))); return; }
   res.warnings.forEach(w => el.appendChild(h('div', { class: 'msg warn' }, w)));
   el.appendChild(h('div', { class: 'msg ok' }, res.size + ' bytes · ' + res.tracks.length + ' tracks · ' + res.L + ' ticks (' + (res.L / song.tempo).toFixed(1) + ' s) · ' + (res.loop ? 'loops' : 'plays once')));
+  res.notes.filter(n => n.indexOf('Shrink song') === 0).forEach(n => el.appendChild(h('div', { class: 'msg ok' }, n)));
   if (!song.loop) el.appendChild(h('div', { class: 'msg warn' }, 'One-shot: the final note is cut when the song stops. Add a rest block at the end to let it ring out.'));
   const hex = UI.hex;
   el.appendChild(h('div', { class: 'row' }, h('label', null, h('input', { type: 'checkbox', checked: !!hex, onchange: e => { UI.hex = e.target.checked; renderRight(); } }), ' Only the raw bytes (hex)')));
