@@ -88,7 +88,7 @@ a.manual:hover{background:#e8c443}
 </head><body>
 <header>
   <a class="site-logo" href="https://t-arg.github.io/" title="TEAM a.r.g." target="_blank" rel="noopener noreferrer"><img src="data:image/gif;base64,R0lGODlheQAuAMIFAEc8Okg8OUY9Nk5BPv7+/P///////////yH+EUNyZWF0ZWQgd2l0aCBHSU1QACH5BAEKAAcALAAAAAB5AC4AAAP+eHrRHivKSau9OOudA/kf4HBkaZ5PCnEe6DrDKc/z0LpfEG83DqrAxo5GNNk+tkduiOklB74oTheswipJq5CSvSqOBHDux7T0WjCptKeO6iTJ9uu9EJMP4Dz0XKacpw8DXYFyhXR4bIUEh4lLLWINi1N9En9hUIBrSFoqmItfTlaeizF5aZJhjR6Cd2Yve6o4rDqoiks5iCBxakJkjze0m7qeHr24ri9twTlopLY/uDd2ysGRtbdiT2OLwILeOw5Tco2oy4q0VMLPzrqJ6T/h13MPCsU4AIMpAFL428/Fj/b5+KYJWhSBLkQY9BGpGKJp8v75wyGgokUBY6w16jL+ioy6dRPn2LDBgBtDkAbNwUshyF6qgSpcsCoHciY5ew0Y7Hp1aV01W+EAMgQyZwzEcc3cjMzZ0I1JnyF5WXspa+rNeCifDpUEQchUeMy+AopHzg0adw3fwTxqi61XkgA7ivjmDaEsb2jsUvu4UslBrFnL4uyapSqQjn3RIA7rV2HWTWJBkptLZQFAYFrWYL3KUi1Kv48jQua2AJ+xVEDm8tv8zLRZ0DAD6I3KSzOVFfVEnA3CjTNYoJFjvlZV9qRZESIipOhNFHDR38DHwp5H3J3T4TmVB+XNbHYOux4AeL+eODIB3Y3Q34uFfYKSKiuZPTe6mLkD9ETlM8YeP1P+e/foISebPOHMtBBXux2Wj3A92cfJfvKZx41ufsDHxnYQMsbJdvnpt6EVw4imYQWylShgdeLFlOCDCN6X4gMvarHPgwMKJiCJ8A1loYYf2lfeh5dlJqJ9OHKnY3M8inLEckkK1xyQto1QSYp03YddGsg5qANdg1xioJaBrJiWV1S0NF1f7kUyI2bBWRgJlwseKROceM35zSp7tMSNmebRU0lYjOkpHSFbFhfaY+OBIB6fR1ZSTGG3pTgojIvECOSlmLJ4Hj47LUGSZUFyqF+TsPAYJTVnUscgczsJYYef9Ty1HIMs1XlbGUFol6ujuxaJGwOmYQaJH6TAkA6DVQbN1YWuQIBaBbPNkvjErwzcBl1X9JiyCjN4GXpMmlbUE8ggzm65LIkvVBAsQ8Cet4K2jkDXxqe8unpuCqBIGUgd3iDzLQUC5BMDTnUIhAk+JT1aBXgVSlltdviKSwesGwwgEMIo/BABJOBo7O8n4Gb38AoRVzsErCpY8EQNXtTRchaUuLxEw0Hs0G3JeJgp8ZZF9HzCyjRHqx259VLs89E915rFyNUiMgI9uRqN9NQsoMxUNO8+jXXKaFDtNQl08VvKFoKI7XQpcJ79tQQJAAA7" alt="TEAM a.r.g."></a>
-  <h1>ATMlib Song Editor <span style="color:#6b5f5e;font-weight:500">v1.1.0</span></h1>
+  <h1>ATMlib Song Editor <span style="color:#6b5f5e;font-weight:500">v1.2.0</span></h1>
   <span class="sep"></span>
   <button id="btnPlay" class="play">▶ Play</button>
   <label>Tempo <input id="tempo" type="number" min="4" max="255" value="34"></label>
@@ -777,7 +777,7 @@ function buildExport(song, o) {
     T.bytes = []; B.items.forEach(x => x.b.forEach(v => T.bytes.push(v)));
   });
 
-  /* optional: shrink song */
+  /* optional: shrink song = drop commands that change nothing + share repeated runs (checked against the sound of the unshrunk song) */
   const pack = () => {
     tracks.forEach(T => { T.bytes = []; T.items.forEach(x => x.b.forEach(v => T.bytes.push(v))); });
     const b = [tracks.length]; let a = 0;
@@ -787,19 +787,32 @@ function buildExport(song, o) {
     return Uint8Array.from(b);
   };
   if (song.shrink) {
-    const before = tracks.map(T => T.items), nBefore = tracks.length, bytesBefore = pack();
+    const before = tracks.map(T => T.items.slice()), nBefore = tracks.length, bytesBefore = pack();
+    const span = L * 3 + 64;
+    const ref = songSound(bytesBefore, used, span);
+    const same = (a, b) => a && b && a.every((v, i) => v === b[i]);
+    let pruned = 0;
+    if (ref) pruned = pruneTracks(tracks, () => same(songSound(pack(), used, span), ref));
     const made = shrinkTracks(tracks);
-    if (made) {
-      const bytesAfter = pack(); let ok = bytesAfter.length < bytesBefore.length;
-      const span = L * 3 + 64;
-      for (let c = 0; c < 4 && ok; c++) {
+    const bytesAfter = pack();
+    let ok = bytesAfter.length < bytesBefore.length;
+    if (ok) {
+      const now = songSound(bytesAfter, used, span);
+      if (ref) ok = same(now, ref);
+      else for (let c = 0; c < 4 && ok; c++) {
         if (!used[c]) continue;
         const f1 = flatten(bytesBefore, c, span), f2 = flatten(bytesAfter, c, span);
-        if (f2.maxDepth > 7 || f1.ticks !== f2.ticks || f1.bytes.length !== f2.bytes.length || f1.bytes.some((v, i) => v !== f2.bytes[i])) ok = false;
+        if (f1.ticks !== f2.ticks || f1.bytes.length !== f2.bytes.length || f1.bytes.some((v, i) => v !== f2.bytes[i])) ok = false;
       }
-      if (ok) { res.notes.push('Shrink song: ' + made + ' shared track' + (made > 1 ? 's' : '') + ' added, ' + (bytesBefore.length - bytesAfter.length) + ' bytes saved (' + bytesBefore.length + ' to ' + bytesAfter.length + '). Checked tick by tick against the unshrunk song.'); res.saved = bytesBefore.length - bytesAfter.length; }
-      else { tracks.length = nBefore; tracks.forEach((T, i) => { T.items = before[i]; }); pack(); res.notes.push('Shrink song: no safe saving found, song left as it was.'); }
-    } else res.notes.push('Shrink song: nothing repeated enough to save bytes.');
+      for (let c = 0; c < 4 && ok; c++) if (used[c] && flatten(bytesAfter, c, span).maxDepth > 7) ok = false;
+    }
+    if (ok) {
+      res.saved = bytesBefore.length - bytesAfter.length;
+      res.notes.push('Shrink song: ' + res.saved + ' bytes saved (' + bytesBefore.length + ' to ' + bytesAfter.length + '): ' + pruned + ' command' + (pruned === 1 ? '' : 's') + ' that changed nothing removed, ' + made + ' shared track' + (made === 1 ? '' : 's') + ' added. Checked tick by tick against the unshrunk song.');
+    } else {
+      tracks.length = nBefore; tracks.forEach((T, i) => { T.items = before[i]; }); pack();
+      res.notes.push(made || pruned ? 'Shrink song: no safe saving found, song left as it was.' : 'Shrink song: nothing to remove or share, song left as it was.');
+    }
   }
 
   /* layout */
@@ -877,6 +890,124 @@ function shrinkTracks(tracks, maxLen) {
     made++;
   }
   return made;
+}
+
+/* ---------- channel simulator: what a flattened command stream does, tick by tick (port of the ATMlib playroutine, one channel) ---------- */
+function simFlat(b, maxTicks) {
+  const s8 = v => (v > 127 ? v - 256 : v);
+  const hz = n => (n <= 0 || n > 63 ? 0 : Math.round(440 * Math.pow(2, (n - 10) / 12)));
+  const c = { note: 0, delay: 0, vol: 0, freq: 0, reCount: 0, reConfig: 0, slide: 0, slideCfg: 0, slideCount: 0, arpNotes: 0, arpTiming: 0, arpCount: 0, tra: 0, treD: 0, treC: 0, treN: 0, glis: 0, glisCount: 0 };
+  const tl = [], ev = []; let p = 0, tick = 0, stopped = false;
+  while (tick < maxTicks) {
+    if (c.reConfig) { if (c.reCount >= (c.reConfig & 3)) c.reCount = 0; else c.reCount++; }
+    if (c.glis) {
+      const cfg = c.glis & 255;
+      if (c.glisCount >= (cfg & 127)) { c.note += (cfg & 128) ? -1 : 1; c.note = Math.max(1, Math.min(63, c.note)); c.freq = hz(c.note); c.glisCount = 0; } else c.glisCount++;
+    }
+    if (c.slide) {
+      if (!c.slideCount) {
+        const isf = !!(c.slideCfg & 0x40); let vf = (isf ? c.freq : c.vol) + c.slide;
+        if (!(c.slideCfg & 0x80)) { if (vf < 0) vf = 0; else if (isf && vf > 9397) vf = 9397; }
+        if (isf) c.freq = vf; else c.vol = vf & 255;
+      }
+      if (c.slideCount >= (c.slideCfg & 63)) c.slideCount = 0; else c.slideCount++;
+    }
+    if (c.arpNotes && c.note) {
+      if ((c.arpCount & 31) < (c.arpTiming & 31)) c.arpCount++;
+      else {
+        if ((c.arpCount & 0xE0) === 0) c.arpCount = 0x20;
+        else if ((c.arpCount & 0xE0) === 0x20 && !(c.arpTiming & 0x40) && c.arpNotes !== 255) c.arpCount = 0x40;
+        else c.arpCount = 0;
+        let an = c.note;
+        if ((c.arpCount & 0xE0) !== 0) an = c.arpNotes === 255 ? 0 : an + (c.arpNotes >> 4);
+        if ((c.arpCount & 0xE0) === 0x40) an += (c.arpNotes & 15);
+        c.freq = hz(an + c.tra);
+      }
+    }
+    if (c.treD) {
+      const isf = !!(c.treC & 0x40); let vt = isf ? c.freq : c.vol;
+      vt = (c.treN & 0x80) ? vt + c.treD : vt - c.treD;
+      if (vt < 0) vt = 0; else if (isf && vt > 9397) vt = 9397;
+      if (isf) c.freq = vt; else c.vol = vt & 255;
+      if ((c.treN & 31) < (c.treC & 31)) c.treN++; else c.treN = (c.treN & 0x80) ? 0 : 0x80;
+    }
+    if (c.delay) { if (c.delay !== 0xFFFF) c.delay--; }
+    else {
+      for (;;) {
+        const cmd = b[p++];
+        if (cmd === undefined) return null;
+        if (cmd < 64) {
+          c.note = cmd; if (cmd) c.note = (cmd + c.tra) & 255; c.freq = hz(c.note);
+          if (c.slideCfg === 0) c.vol = c.reCount;
+          if (c.arpTiming & 0x20) c.arpCount = 0;
+          ev.push(tick + ':' + c.note + ':' + c.vol + ':' + c.arpNotes + ',' + c.arpTiming + ':' + c.tra);
+        } else if (cmd < 160) {
+          const fx = cmd - 64;
+          if (fx === 0) { c.vol = b[p++]; c.reCount = c.vol; }
+          else if (fx === 1 || fx === 4) { c.slide = s8(b[p++]); c.slideCfg = fx === 1 ? 0 : 0x40; }
+          else if (fx === 2 || fx === 5) { c.slide = s8(b[p]); c.slideCfg = b[p + 1]; p += 2; if (fx === 5) c.slideCfg |= 0x40; }
+          else if (fx === 3 || fx === 6) c.slide = 0;
+          else if (fx === 7) { c.arpNotes = b[p]; c.arpTiming = b[p + 1]; p += 2; }
+          else if (fx === 8 || fx === 21) c.arpNotes = 0;
+          else if (fx === 9) c.reConfig = b[p++];
+          else if (fx === 10) c.reConfig = 0;
+          else if (fx === 11) c.tra = s8((c.tra + s8(b[p++])) & 255);
+          else if (fx === 12) c.tra = s8(b[p++]);
+          else if (fx === 13) c.tra = 0;
+          else if (fx === 14 || fx === 16) { c.treD = b[p]; c.treC = b[p + 1] + (fx === 14 ? 0 : 0x40); p += 2; }
+          else if (fx === 15 || fx === 17) c.treD = 0;
+          else if (fx === 18) c.glis = b[p++];
+          else if (fx === 19) c.glis = 0;
+          else if (fx === 20) { c.arpNotes = 255; c.arpTiming = b[p++]; }
+          else if (fx === 22) return null;
+          else if (fx === 23) { ev.push(tick + ':cue:' + b[p++]); }
+          else if (cmd === 156 || cmd === 157) p++;
+          else if (cmd === 158) p += 4;
+          else if (cmd === 159) { c.vol = 0; c.delay = 0xFFFF; stopped = true; }
+          else return null;
+        } else if (cmd < 224) c.delay = cmd - 159;
+        else if (cmd === 224) { let q = 0; for (;;) { const d = b[p++]; q = (q << 7) | (d & 127); if (!(d & 128)) break; } c.delay = q + 65; }
+        else return null;
+        if (c.delay !== 0) break;
+      }
+      if (c.delay !== 0xFFFF) c.delay--;
+    }
+    tl.push(c.vol + ',' + c.freq);
+    tick++;
+  }
+  return tl.join(';') + '|' + ev.join(';');
+}
+
+/* the sound of a whole song: one simulated stream per used channel, or null when a stream cannot be simulated */
+function songSound(bytes, used, span) {
+  const out = [];
+  for (let ch = 0; ch < 4; ch++) {
+    if (!used[ch]) { out.push(''); continue; }
+    const f = flatten(bytes, ch, span);
+    const r = simFlat(f.bytes, f.ticks);
+    if (r === null) return null;
+    out.push(f.ticks + '#' + r);
+  }
+  return out;
+}
+
+/* removes commands that change nothing (a volume, slide or transposition that is already set when the command is reached);
+   every removal is kept only when the simulated sound is identical. Returns how many commands were removed. */
+function pruneTracks(tracks, sameSound) {
+  let removed = 0;
+  tracks.forEach(T => {
+    if (T.kind === 'stop') return;
+    for (let i = 0; i < T.items.length;) {
+      const o = T.items[i].b[0];
+      if (o >= 0x40 && o <= 0x9B) {
+        const it = T.items.splice(i, 1)[0];
+        if (sameSound()) { removed++; continue; }
+        T.items.splice(i, 0, it);
+      }
+      i++;
+    }
+  });
+  return removed;
 }
 
 /* ---------- text output ---------- */
@@ -1357,7 +1488,7 @@ root.ATMED = {
   newSong, addPattern, addPlacement, patternUses, deletePattern, duplicatePattern, ensureInstrument, addDrumPreset,
   laneTicks, songTicks, normalizeTone, putNote, putHit, setPatternLen, instEvents, evState,
   patternHasContent, toneOps, drumOps, opsOfPattern, buildExport, exportText, exportHex, cIdent,
-  parseSong, flatten, chunkStream, setEngine, renderStreams, renderExport, SR,
+  parseSong, flatten, simFlat, shrinkTracks, pruneTracks, chunkStream, setEngine, renderStreams, renderExport, SR,
   parseHeaderBytes, listHeaderSongs, streamToEvents, importSongBytes, migrate, uid
 };
 if (typeof module !== 'undefined' && module.exports) module.exports = root.ATMED;
@@ -1367,7 +1498,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = root.ATMED
 'use strict';
 const A = window.ATMED;
 A.setEngine(function () { return AtmLib(); });
-const VERSION = '1.1.0';
+const VERSION = '1.2.0';
 const $ = s => document.querySelector(s);
 function h(tag, attrs) {
   const el = document.createElement(tag);
@@ -2057,7 +2188,7 @@ let exportCache = null;
 function rightExport(el) {
   const res = A.buildExport(song); exportCache = res;
   el.appendChild(h('h2', null, 'Export song.h'));
-  el.appendChild(h('div', { class: 'row' }, h('label', null, h('input', { type: 'checkbox', checked: !!song.shrink, onchange: e => mutate(() => { song.shrink = e.target.checked; }) }), ' Shrink song (share repeated runs in extra tracks)')));
+  el.appendChild(h('div', { class: 'row' }, h('label', null, h('input', { type: 'checkbox', checked: !!song.shrink, onchange: e => mutate(() => { song.shrink = e.target.checked; }) }), ' Shrink song (drop commands that change nothing, share repeated runs)')));
   if (res.errors.length) { res.errors.forEach(e => el.appendChild(h('div', { class: 'msg err' }, e))); return; }
   res.warnings.forEach(w => el.appendChild(h('div', { class: 'msg warn' }, w)));
   el.appendChild(h('div', { class: 'msg ok' }, res.size + ' bytes · ' + res.tracks.length + ' tracks · ' + res.L + ' ticks (' + (res.L / song.tempo).toFixed(1) + ' s) · ' + (res.loop ? 'loops' : 'plays once')));
